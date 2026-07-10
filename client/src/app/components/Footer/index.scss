@@ -1,0 +1,18 @@
+@use "sass:map";
+@use "../../styles/variables" as *;
+
+.Footer {
+    background-color: map.get($color, "light");
+    color: map.get($color, "grey");
+    font-size: map.get($size, "sm");
+    padding: {
+        top: map.get($spacing, "md");
+        bottom: map.get($spacing, "md");
+    };
+
+    .inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

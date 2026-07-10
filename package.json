@@ -1,0 +1,17 @@
+{
+  "name": "pern-prisma-otp-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "get-started": "npm install && npm install --prefix server && npm install --prefix client && npm run prisma:generate --prefix server",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm start --prefix client\"",
+    "server": "npm run dev --prefix server",
+    "client": "npm start --prefix client",
+    "build": "npm run build --prefix client",
+    "prisma:migrate": "npm run prisma:migrate --prefix server",
+    "prisma:studio": "npm run prisma:studio --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
