@@ -82,7 +82,13 @@ const App = (props) => {
               <PrivateRoute exact path="/maintenance" {...props} component={Maintenance} />
               <PrivateRoute exact path="/audits" {...props} component={Audits} />
               <PrivateRoute exact path="/audits/:id" {...props} component={Audits} />
-              <PrivateRoute exact path="/reports" {...props} component={Reports} />
+              <RoleRoute
+                exact
+                path="/reports"
+                roles={["ADMIN", "ASSET_MANAGER", "DEPARTMENT_HEAD"]}
+                {...props}
+                component={Reports}
+              />
               <PrivateRoute exact path="/notifications" {...props} component={Notifications} />
               <PrivateRoute
                 exact

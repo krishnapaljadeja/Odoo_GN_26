@@ -248,24 +248,18 @@ code, pre, .mono-text, .badge, .ui-badge, td.font-medium, .asset-tag, .font-spac
   background-image: none !important;
 }
 
-[class*="text-emerald-"],
-[class*="text-green-"],
-[class*="text-lime-"] {
-  color: #f2b25a !important;
+/* Utility: hide visible scrollbars but keep scroll behavior (mouse/touch/keyboard) */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+    width: 0;
+    height: 0;
+  }
 }
 
-[class*="bg-emerald-"],
-[class*="bg-green-"],
-[class*="bg-lime-"],
-[class*="from-emerald-"],
-[class*="from-green-"],
-[class*="from-lime-"],
-[class*="to-emerald-"],
-[class*="to-green-"],
-[class*="to-lime-"] {
-  background-color: #1c1a18 !important;
-  background-image: none !important;
-}
 /***** Media Query Blocks *****/
 
 /*
