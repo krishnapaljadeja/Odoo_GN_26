@@ -19,6 +19,7 @@ const OrganizationSetup = React.lazy(() => import("./app/routes/OrganizationSetu
 const Assets = React.lazy(() => import("./app/routes/Assets"));
 const AssetDetail = React.lazy(() => import("./app/routes/Assets/Detail"));
 const Allocations = React.lazy(() => import("./app/routes/Allocations"));
+const Bookings = React.lazy(() => import("./app/routes/Bookings"));
 const Private = React.lazy(() => import("./app/routes/Private"));
 
 const App = (props) => {
@@ -73,6 +74,7 @@ const App = (props) => {
               <PrivateRoute exact path="/assets" {...props} component={Assets} />
               <PrivateRoute exact path="/assets/:id" {...props} component={AssetDetail} />
               <PrivateRoute exact path="/allocations" {...props} component={Allocations} />
+              <PrivateRoute exact path="/bookings" {...props} component={Bookings} />
               <PrivateRoute
                 exact
                 path="/another"
