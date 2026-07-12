@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -176,6 +177,8 @@ const TransferForm = ({ asset, holder, onDone }) => {
 };
 
 const AllocateTransferTab = () => {
+  const { user } = useSelector((state) => state.auth);
+  const canManage = user.role === "ADMIN" || user.role === "ASSET_MANAGER";
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [assetDetail, setAssetDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -194,6 +197,8 @@ const AllocateTransferTab = () => {
   }, [selectedAsset]);
 
   const activeAllocation = assetDetail?.allocations?.find((a) => a.status === "ACTIVE");
+  const isCurrentHolder = activeAllocation?.user?.id === user.id;
+  const canRequestTransfer = canManage || isCurrentHolder;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -209,11 +214,21 @@ const AllocateTransferTab = () => {
 
         {assetDetail && !isLoading && (
           <>
-            {assetDetail.status === "AVAILABLE" && (
+            {assetDetail.status === "AVAILABLE" && canManage && (
               <Card>
                 <CardContent>
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">Allocate Asset</h3>
                   <AllocationForm asset={assetDetail} onDone={() => loadDetail(assetDetail.id)} />
+                </CardContent>
+              </Card>
+            )}
+
+            {assetDetail.status === "AVAILABLE" && !canManage && (
+              <Card>
+                <CardContent>
+                  <p className="text-sm text-zinc-400">
+                    {assetDetail.assetTag} is available. Direct allocation is handled by Admins and Asset Managers.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -231,7 +246,13 @@ const AllocateTransferTab = () => {
 
                 <Card>
                   <CardContent>
-                    <TransferForm asset={assetDetail} holder={activeAllocation?.user} onDone={() => loadDetail(assetDetail.id)} />
+                    {canRequestTransfer ? (
+                      <TransferForm asset={assetDetail} holder={activeAllocation?.user} onDone={() => loadDetail(assetDetail.id)} />
+                    ) : (
+                      <p className="text-sm text-zinc-400">
+                        Transfer requests can only be raised by the current holder, Admins, or Asset Managers.
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </>

@@ -44,7 +44,7 @@ const EmployeeCombobox = ({ value, onChange, placeholder = "Select employee...",
       <div className="relative">
         <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
         <Input
-          className="pl-9"
+          style={{ paddingLeft: "2.5rem" }}
           placeholder={placeholder}
           value={query}
           onFocus={() => setOpen(true)}

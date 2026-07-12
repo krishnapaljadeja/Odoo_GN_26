@@ -5,8 +5,33 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+const extractApiMessage = (error) => {
+  const data = error?.response?.data || error?.data || error;
+
+  if (typeof data === "string") return data;
+  return (
+    data?.error?.message ||
+    data?.message ||
+    error?.apiMessage ||
+    error?.response?.data?.error?.message ||
+    error?.response?.data?.message
+  );
+};
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const apiMessage = extractApiMessage(error);
+    if (apiMessage) {
+      error.apiMessage = apiMessage;
+      error.message = apiMessage;
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const getApiMessage = (error, fallback = "Something went wrong") =>
-  error?.response?.data?.error?.message || error?.response?.data?.message || error?.message || fallback;
+  extractApiMessage(error) || error?.message || fallback;
 
 export const toAbsoluteUploadUrl = (url) => {
   if (!url) return url;
