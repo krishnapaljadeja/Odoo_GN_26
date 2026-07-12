@@ -6,7 +6,13 @@ export const api = axios.create({
 });
 
 export const getApiMessage = (error, fallback = "Something went wrong") =>
-  error?.response?.data?.message || error?.message || fallback;
+  error?.response?.data?.error?.message || error?.response?.data?.message || error?.message || fallback;
+
+export const toAbsoluteUploadUrl = (url) => {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${api.defaults.baseURL || ""}${url}`;
+};
 
 export const request = async (config) => {
   const response = await api.request(config);
