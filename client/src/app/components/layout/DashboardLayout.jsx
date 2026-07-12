@@ -1,12 +1,17 @@
 import React from "react";
-import AppShell from "./AppShell";
-import { cn } from "@/lib/utils";
+import Sidebar from "./Sidebar";
+import TopBar from "./TopBar";
 
-const DashboardLayout = ({ children, aside, className }) => (
-  <AppShell className={cn("grid gap-6 lg:grid-cols-[16rem_1fr]", className)}>
-    {aside && <aside className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">{aside}</aside>}
-    <section className="min-w-0">{children}</section>
-  </AppShell>
+const DashboardLayout = ({ children }) => (
+  <div className="flex min-h-screen bg-zinc-950">
+    <aside className="hidden w-60 shrink-0 border-r border-zinc-800 md:block">
+      <Sidebar />
+    </aside>
+    <div className="flex min-w-0 flex-1 flex-col">
+      <TopBar />
+      <main className="flex-1 overflow-y-auto px-6 py-6">{children}</main>
+    </div>
+  </div>
 );
 
 export default DashboardLayout;
