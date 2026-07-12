@@ -45,7 +45,7 @@ const TopBar = () => {
   };
 
   return (
-    <header className="flex items-center justify-end gap-4 border-b border-zinc-800 bg-zinc-950 px-6 py-3">
+    <header className="sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-zinc-800 bg-zinc-950 px-6 py-3">
       <Link
         to="/notifications"
         className="relative rounded-md p-2 text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
