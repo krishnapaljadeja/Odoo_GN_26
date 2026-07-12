@@ -29,8 +29,53 @@ $nav-height: 4rem;
             color: #28E99F !important;
         }
     }
+
+    .logo-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        color: inherit;
+        
+        .brand-logo-mark {
+            font-family: "Anybody", sans-serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            background: #fdf2f5;
+            border: 1px dashed #e599b4;
+            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #e599b4;
+            line-height: 1;
+            font-weight: 800;
+            transform: rotate(-8deg);
+        }
+        
+        .brand-name {
+            font-family: "Anybody", sans-serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: inherit;
+        }
+    }
+
+    .nav-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.5rem;
+        
+        a {
+            text-decoration: none;
+        }
+    }
 }
 
 .Navbar-Offset {
     height: $nav-height;
 }
+
