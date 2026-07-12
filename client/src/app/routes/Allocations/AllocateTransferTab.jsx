@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import { createTransferSchema } from "@/features/transfers/schemas";
 import { useDepartments } from "@/features/org/hooks";
 import { getApiMessage } from "@/lib/api";
 import { AssetStatusBadge, STATUS_LABEL } from "@/features/assets/badges";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import AssetCombobox from "./AssetCombobox";
 import EmployeeCombobox from "./EmployeeCombobox";
 
@@ -183,18 +184,22 @@ const AllocateTransferTab = () => {
   const [assetDetail, setAssetDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadDetail = (assetId) => {
-    setIsLoading(true);
+  const loadDetail = useCallback((assetId, { silent = false } = {}) => {
+    if (!assetId) return;
+    if (!silent) setIsLoading(true);
     assetsApi
       .getById(assetId)
       .then((res) => setAssetDetail(res.payload))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     if (selectedAsset) loadDetail(selectedAsset.id);
     else setAssetDetail(null);
   }, [selectedAsset]);
+  useLiveRefresh(() => loadDetail(selectedAsset?.id, { silent: true }), { enabled: Boolean(selectedAsset), deps: [selectedAsset?.id] });
 
   const activeAllocation = assetDetail?.allocations?.find((a) => a.status === "ACTIVE");
   const isCurrentHolder = activeAllocation?.user?.id === user.id;

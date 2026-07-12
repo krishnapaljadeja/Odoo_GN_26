@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Archive, Boxes, CalendarClock, CheckCircle2, Clock, Send, Wrench } from "lucide-react";
@@ -6,6 +6,7 @@ import { DashboardLayout, PageHeader } from "../../components/layout";
 import { DataState, StatCard } from "../../components/data";
 import { reportsApi } from "@/features/reports/api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const titleCase = (value) =>
   value
@@ -81,13 +82,20 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
+    setError("");
     reportsApi
       .kpis()
       .then((res) => setData(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load dashboard")))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
   }, []);
+
+  useEffect(load, [load]);
+  useLiveRefresh(load, { intervalMs: 8000 });
 
   const activity = data?.recentActivity || [];
 

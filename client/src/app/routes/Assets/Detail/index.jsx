@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ArrowLeft, Pencil, ShieldAlert } from "lucide-react";
@@ -9,6 +9,7 @@ import { assetsApi } from "@/features/assets/api";
 import { AssetStatusBadge, CONDITION_LABEL } from "@/features/assets/badges";
 import { useDepartments, useCategories } from "@/features/org/hooks";
 import { getApiMessage, toAbsoluteUploadUrl } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import RegisterAssetDialog from "../RegisterAssetDialog";
 import StatusChangeDialog from "./StatusChangeDialog";
 
@@ -39,18 +40,21 @@ const AssetDetail = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     assetsApi
       .getById(id)
       .then((res) => setAsset(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load asset")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [id]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [id]);
+  useLiveRefresh(load, { enabled: !editOpen && !statusOpen, deps: [id] });
 
   return (
     <DashboardLayout>

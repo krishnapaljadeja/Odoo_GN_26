@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { orgApi } from "./api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 // Shared by every module that needs a department/category picker (Assets,
 // Allocations, Bookings, ...) so they all read from the same live source per
@@ -14,9 +15,9 @@ const useOrgList = (fetcher, params) => {
 
   const paramsKey = JSON.stringify(params || {});
 
-  useEffect(() => {
+  const load = useCallback(({ silent = false } = {}) => {
     let mounted = true;
-    setIsLoading(true);
+    if (!silent) setIsLoading(true);
     setError("");
 
     fetcher({ limit: 100, ...(params || {}) })
@@ -27,14 +28,17 @@ const useOrgList = (fetcher, params) => {
         if (mounted) setError(getApiMessage(err, "Could not load data"));
       })
       .finally(() => {
-        if (mounted) setIsLoading(false);
+        if (mounted && !silent) setIsLoading(false);
       });
 
     return () => {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paramsKey, reloadToken]);
+  }, [fetcher, paramsKey, reloadToken]);
+
+  useEffect(load, [load]);
+  useLiveRefresh(load, { deps: [paramsKey], intervalMs: 10000 });
 
   const refetch = useCallback(() => setReloadToken((token) => token + 1), []);
 

@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart3, Download } from "lucide-react";
 import { DashboardLayout, PageHeader } from "../../components/layout";
 import { Button, Select } from "@/components/ui";
 import { DataState } from "../../components/data";
 import { reportsApi } from "@/features/reports/api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const Bar = ({ value, max = 100, label }) => (
   <div className="grid gap-1">
@@ -34,8 +35,8 @@ const Reports = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     Promise.all([
       reportsApi.utilization({ groupBy }),
@@ -58,8 +59,13 @@ const Reports = () => {
         }),
       )
       .catch((err) => setError(getApiMessage(err, "Could not load reports")))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
   }, [groupBy]);
+
+  useEffect(load, [load]);
+  useLiveRefresh(load, { deps: [groupBy], intervalMs: 10000 });
 
   const maxMaintenance = useMemo(() => Math.max(1, ...(data?.maintenance || []).map((row) => row.count)), [data]);
   const heatMax = useMemo(() => Math.max(1, ...Object.values(data?.heatmap || {})), [data]);

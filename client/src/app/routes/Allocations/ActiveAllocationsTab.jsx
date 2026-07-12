@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, ArrowUpDown, Undo2 } from "lucide-react";
@@ -8,6 +8,7 @@ import { DataState, EmptyState } from "../../components/data";
 import { allocationsApi } from "@/features/allocations/api";
 import { useDepartments } from "@/features/org/hooks";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import ReturnDialog from "./ReturnDialog";
 
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : "—");
@@ -50,18 +51,21 @@ const ActiveAllocationsTab = () => {
     [status, departmentId, sort, page],
   );
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     allocationsApi
       .list(params)
       .then((res) => setResult(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load allocations")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [params]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [JSON.stringify(params)]);
+  useLiveRefresh(load, { enabled: !returning, deps: [JSON.stringify(params)] });
 
   const onSort = (key) => {
     setSort((prev) =>

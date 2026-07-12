@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, ClipboardList, Play, Plus, UserCog, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { orgApi } from "@/features/org/api";
 import { maintenanceApi } from "@/features/maintenance/api";
 import { PriorityBadge, STATUS_LABEL } from "@/features/maintenance/badges";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import { AssignDialog, RaiseRequestDialog, RejectDialog, ResolveDialog } from "./MaintenanceDialogs";
 
 const COLUMNS = [
@@ -108,8 +109,8 @@ const Maintenance = () => {
 
   const params = useMemo(() => ({ search: search || undefined, priority: priority || undefined, limit: 100 }), [search, priority]);
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     Promise.all([
       maintenanceApi.list(params),
@@ -122,11 +123,17 @@ const Maintenance = () => {
         setEmployees(employeesRes.payload.data);
       })
       .catch((err) => setError(getApiMessage(err, "Could not load maintenance board")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [params]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [JSON.stringify(params)]);
+  useLiveRefresh(load, {
+    enabled: !raiseOpen && !rejecting && !assigning && !resolving,
+    deps: [JSON.stringify(params)],
+  });
 
   const mutate = async (action, success) => {
     try {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 import { Bell, ChevronDown, LogOut } from "lucide-react";
@@ -7,6 +7,7 @@ import { signout } from "../../state/authSlice";
 import { authApi } from "@/features/auth/api";
 import { notificationsApi } from "@/features/notifications/api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const ROLE_LABEL = {
   ADMIN: "Admin",
@@ -22,12 +23,15 @@ const TopBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [unread, setUnread] = useState(0);
 
-  useEffect(() => {
+  const loadUnread = useCallback(() => {
     notificationsApi
       .unreadCount()
       .then((res) => setUnread(res.payload.count))
       .catch(() => setUnread(0));
   }, []);
+
+  useEffect(loadUnread, [loadUnread]);
+  useLiveRefresh(loadUnread, { intervalMs: 5000 });
 
   const handleLogout = async () => {
     try {

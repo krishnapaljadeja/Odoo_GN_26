@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { DashboardLayout, PageHeader } from "../../components/layout";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataState, EmptyState } from "../../components/data";
 import { logsApi, notificationsApi } from "@/features/notifications/api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const relativeTime = (value) => {
   const diff = Math.max(0, Date.now() - new Date(value).getTime());
@@ -32,28 +33,32 @@ const Notifications = () => {
 
   const logParams = useMemo(() => ({ search: logSearch || undefined, entity: entity || undefined, limit: 50, sortOrder: "desc" }), [logSearch, entity]);
 
-  const loadNotifications = () => {
-    setIsLoading(true);
+  const loadNotifications = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     notificationsApi
       .list({ group: tab, limit: 50 })
       .then((res) => setNotifs(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load notifications")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [tab]);
 
-  const loadLogs = () => {
+  const loadLogs = useCallback(() => {
     if (!canSeeLogs) return;
     logsApi
       .list(logParams)
       .then((res) => setLogs(res.payload))
       .catch(() => setLogs({ data: [], total: 0 }));
-  };
+  }, [canSeeLogs, logParams]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(loadNotifications, [tab]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(loadLogs, [JSON.stringify(logParams), canSeeLogs]);
+  useLiveRefresh(loadNotifications, { deps: [tab] });
+  useLiveRefresh(loadLogs, { enabled: canSeeLogs && tab === "logs", deps: [JSON.stringify(logParams), canSeeLogs, tab] });
 
   const markRead = async (id) => {
     try {
