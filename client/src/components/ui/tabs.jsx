@@ -25,7 +25,7 @@ export const TabsTrigger = ({ value, children, className }) => {
       onClick={() => ctx.onValueChange(value)}
       className={cn(
         "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-        isActive ? "bg-emerald-600 text-zinc-950" : "text-zinc-400 hover:text-zinc-100",
+        isActive ? "bg-amber-500 text-zinc-950" : "text-zinc-400 hover:text-zinc-100",
         className,
       )}
     >

@@ -62,7 +62,7 @@ const Signup = () => {
             <CardTitle className="text-xl">
               {pendingEmail ? "AssetFlow - verify email" : "AssetFlow - create account"}
             </CardTitle>
-            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#28E99F] bg-[#28E99F]/10 text-base font-bold font-mono text-[#28E99F]">
+            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#f2b25a] bg-[#f2b25a]/10 text-base font-bold font-mono text-[#f2b25a]">
               AF
             </div>
           </CardHeader>
@@ -176,7 +176,7 @@ const Signup = () => {
 
             <p className="text-center text-sm text-zinc-400">
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-emerald-400 hover:text-emerald-300">
+              <Link to="/login" className="font-medium text-amber-400 hover:text-amber-300">
                 Sign in
               </Link>
             </p>

@@ -46,7 +46,7 @@ const Login = () => {
         <Card as="form" className="w-full max-w-md" onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">AssetFlow &ndash; login</CardTitle>
-            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#28E99F] bg-[#28E99F]/10 text-base font-bold font-mono text-[#28E99F]">
+            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#f2b25a] bg-[#f2b25a]/10 text-base font-bold font-mono text-[#f2b25a]">
               AF
             </div>
           </CardHeader>
@@ -82,7 +82,7 @@ const Login = () => {
             </Button>
 
             <div className="text-right">
-              <Link to="/forgot-password" className="text-sm font-medium text-emerald-400 hover:text-emerald-300">
+              <Link to="/forgot-password" className="text-sm font-medium text-amber-400 hover:text-amber-300">
                 Forgot password
               </Link>
             </div>
