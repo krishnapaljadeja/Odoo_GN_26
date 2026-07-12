@@ -43,5 +43,6 @@ app.use("/api/allocations", require("./routes/allocations"));
 app.use("/api/transfers", require("./routes/transfers"));
 app.use("/api/bookings", require("./routes/bookings"));
 app.use("/api/maintenance", require("./routes/maintenance"));
+app.use("/api/audits", require("./routes/audits"));
 
 module.exports = app;
