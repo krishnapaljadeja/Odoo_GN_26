@@ -28,6 +28,8 @@ const setAuthCookie = (res, authenticated_user) => {
 
 const toAuthenticatedUser = (user) => ({
   id: user.id,
+  email: user.login_id || user.loginId,
+  username: user.first_name || user.firstName,
   login_id: user.login_id || user.loginId,
   first_name: user.first_name || user.firstName,
   last_name: user.last_name || user.lastName,
@@ -38,7 +40,15 @@ const toAuthenticatedUser = (user) => ({
 //@access   public
 router.post("/", async (req, res) => {
   try {
-    const { login_id, password, first_name, last_name } = req.body;
+    const login_id = (req.body.login_id || req.body.email || "").trim().toLowerCase();
+    const first_name = (req.body.first_name || req.body.username || "").trim();
+    const { password, last_name } = req.body;
+
+    if (!login_id || !first_name || !password) {
+      return res.status(400).json({
+        message: "Email, username and password are required",
+      });
+    }
 
     //Check and notify if user already exists
     const existingUser = await mw.db.getUserByLoginId(login_id);
@@ -59,6 +69,8 @@ router.post("/", async (req, res) => {
     //Prepare user info to be sent to client and for access token
     const authenticated_user = {
       id: newUser.id,
+      email: newUser.login_id,
+      username: newUser.first_name,
       login_id: newUser.login_id,
       first_name: newUser.first_name,
       last_name: newUser.last_name,
@@ -88,11 +100,13 @@ router.post("/", async (req, res) => {
 //@access   public
 router.post("/signup/request-otp", async (req, res) => {
   try {
-    const { login_id, password, first_name, last_name } = req.body;
+    const login_id = (req.body.login_id || req.body.email || "").trim().toLowerCase();
+    const first_name = (req.body.first_name || req.body.username || "").trim();
+    const { password, last_name } = req.body;
 
     if (!login_id || !password || !first_name) {
       return res.status(400).json({
-        message: "Login id, password and first name are required",
+        message: "Email, username and password are required",
       });
     }
 

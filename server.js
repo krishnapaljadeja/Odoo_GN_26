@@ -1,12 +1,13 @@
 require("dotenv").config();
-const app = require("./src/app");
+
+const app = require("./server/src/app");
 const { resolve } = require("path");
 
 app.get("*", (req, res) => {
-  res.sendFile(resolve(__dirname, "client", "build", "index.html"));
+  res.sendFile(resolve(__dirname, "client", "dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server live on port ${PORT} 🔥`);
+  console.log(`Server live on port ${PORT}`);
 });

@@ -9,7 +9,14 @@ const express = require("express"),
 //@access   private
 router.post("/", async (req, res) => {
   try {
-    const { login_id, password } = req.body;
+    const login_id = (req.body.login_id || req.body.email || "").trim().toLowerCase();
+    const { password } = req.body;
+
+    if (!login_id || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
 
     //Check and notify if user does not exist
     const user = await mw.db.getUserByLoginId(login_id);
@@ -31,6 +38,8 @@ router.post("/", async (req, res) => {
     //Prepare user info to be sent to client and for access token
     const authenticated_user = {
       id: user.id,
+      email: user.login_id,
+      username: user.first_name,
       login_id: user.login_id,
       first_name: user.first_name,
       last_name: user.last_name,

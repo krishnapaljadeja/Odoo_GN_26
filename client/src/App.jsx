@@ -8,6 +8,7 @@ import PrivateRoute from "./app/containers/PrivateRoute";
 import Navbar from "./app/containers/Navbar";
 import Footer from "./app/components/Footer";
 import Loading from "./app/components/Loading";
+import { SmoothScroll } from "./app/components/animation";
 
 const Signin = React.lazy(() => import("./app/routes/Signin"));
 const Signup = React.lazy(() => import("./app/routes/Signup"));
@@ -33,26 +34,28 @@ const App = (props) => {
     <React.Fragment>
       <Router>
         <Navbar />
-        <Suspense fallback={<Loading />}>
-          <Switch>
-            <Route exact path="/" {...props} component={Landing} />
-            <Route exact path="/signin" {...props} component={Signin} />
-            <Route exact path="/signup" {...props} component={Signup} />
-            <PrivateRoute
-              exact
-              path="/dashboard"
-              {...props}
-              component={Dashboard}
-            />
-            <PrivateRoute
-              exact
-              path="/another"
-              {...props}
-              component={Private}
-            />
-          </Switch>
-        </Suspense>
-        <Footer />
+        <SmoothScroll>
+          <Suspense fallback={<Loading />}>
+            <Switch>
+              <Route exact path="/" {...props} component={Landing} />
+              <Route exact path="/signin" {...props} component={Signin} />
+              <Route exact path="/signup" {...props} component={Signup} />
+              <PrivateRoute
+                exact
+                path="/dashboard"
+                {...props}
+                component={Dashboard}
+              />
+              <PrivateRoute
+                exact
+                path="/another"
+                {...props}
+                component={Private}
+              />
+            </Switch>
+          </Suspense>
+          <Footer />
+        </SmoothScroll>
       </Router>
     </React.Fragment>
   );

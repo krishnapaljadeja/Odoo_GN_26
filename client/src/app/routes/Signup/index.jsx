@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { useHistory } from "react-router";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { toast } from "sonner";
 import { signin } from "../../state/authSlice";
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "../../components/ui";
 
 import "./index.scss";
 
@@ -12,130 +14,95 @@ const Signup = () => {
   const dispatch = useDispatch();
 
   const defaultLocalState = {
-    loginId: "",
+    email: "",
+    username: "",
     password: "",
-    firstName: "",
-    lastName: "",
-    otp: "",
   };
 
   const [localState, setLocalState] = useState(defaultLocalState);
-  const [otpRequested, setOtpRequested] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     e.preventDefault();
     setLocalState({ ...localState, [e.target.name]: e.target.value });
   };
 
-  const onClickRequestOtp = async (e) => {
+  const onClickSignup = async (e) => {
     try {
       e.preventDefault();
 
-      if (localState.loginId === "" || localState.password === "" || localState.firstName === "") {
-        window.alert("Login id, password or first name cannot be blank");
+      if (localState.email === "" || localState.username === "" || localState.password === "") {
+        toast.error("Email, username and password are required.");
         return;
       }
 
-      const res = await axios.post("/api/user/signup/request-otp", {
-        login_id: localState.loginId,
+      setIsSubmitting(true);
+      const res = await axios.post("/auth/signup", {
+        email: localState.email,
+        username: localState.username,
         password: localState.password,
-        first_name: localState.firstName,
-        last_name: localState.lastName,
       });
 
-      if (res.status === 200) {
-        setOtpRequested(true);
-        window.alert("OTP sent. In development without SMTP credentials, check the server console.");
-      }
-    } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data) {
-        window.alert(error.response.data.message);
-      }
-    }
-  };
-
-  const onClickVerifyOtp = async (e) => {
-    try {
-      e.preventDefault();
-
-      if (localState.loginId === "" || localState.otp === "") {
-        window.alert("Login id and OTP cannot be blank");
-        return;
-      }
-
-      const res = await axios.post("/api/user/signup/verify-otp", {
-        login_id: localState.loginId,
-        otp: localState.otp,
-      });
-
-      if (res.status === 200) {
+      if (res.status === 201 || res.status === 200) {
         const { expires, user } = res.data.payload;
         dispatch(signin({ expires, user }));
         setLocalState(defaultLocalState);
-        setOtpRequested(false);
+        toast.success("Account created.");
         history.replace({
-          pathname: import.meta.env.VITE_DEFAULT_LOGIN_REDIRECT,
+          pathname: import.meta.env.VITE_DEFAULT_LOGIN_REDIRECT || "/dashboard",
         });
       }
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data) {
-        window.alert(error.response.data.message);
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Could not create account. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="Signup">
-      <div className="inner container is-fluid">
-        <h2>Sign Up</h2>
-        <input
-          type="text"
-          placeholder="First Name"
-          name="firstName"
-          value={localState.firstName}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          name="lastName"
-          value={localState.lastName}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          type="text"
-          placeholder="Login Id"
-          name="loginId"
-          value={localState.loginId}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          name="password"
-          value={localState.password}
-          onChange={handleChange}
-          className="input"
-        />
-        {otpRequested && (
-          <input
-            type="text"
-            placeholder="OTP"
-            name="otp"
-            value={localState.otp}
+      <Card as="form" className="auth-card" onSubmit={onClickSignup}>
+        <CardHeader>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Create your account with an auto-generated user ID.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={localState.email}
             onChange={handleChange}
-            className="input"
+            autoComplete="email"
           />
-        )}
-        <button onClick={otpRequested ? onClickVerifyOtp : onClickRequestOtp} className="button">
-          {otpRequested ? "Verify OTP" : "Send OTP"}
-        </button>
-      </div>
+          <Input
+            type="text"
+            placeholder="Username"
+            name="username"
+            value={localState.username}
+            onChange={handleChange}
+            autoComplete="username"
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            name="password"
+            value={localState.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+          />
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" isLoading={isSubmitting}>
+            Create Account
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

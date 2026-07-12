@@ -1,12 +1,11 @@
 import React from "react";
 import "./index.scss";
-
-import Main from "./Main";
+import { Loader } from "../ui";
 
 const Loading = () => {
   return (
     <div className="Loading">
-      <Main />
+      <Loader />
     </div>
   );
 };

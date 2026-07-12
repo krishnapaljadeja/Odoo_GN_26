@@ -4,7 +4,7 @@ const app = require("./src/app");
 const { resolve } = require("path");
 
 app.get("*", (req, res) => {
-  res.sendFile(resolve(__dirname, "..", "client", "build", "index.html"));
+  res.sendFile(resolve(__dirname, "..", "client", "dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 8080;
