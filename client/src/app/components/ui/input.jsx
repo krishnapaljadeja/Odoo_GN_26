@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "../../../lib/utils";
 
 export const Input = React.forwardRef(({ className, ...props }, ref) => (
-  <input className={cn("ui-input", className)} ref={ref} {...props} />
+  <input className={cn("ui-input pr-10", className)} ref={ref} {...props} />
 ));
 
 Input.displayName = "Input";

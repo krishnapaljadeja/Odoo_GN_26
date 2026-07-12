@@ -28,13 +28,14 @@ body {
 }
 
 #smooth-wrapper {
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 1;
 }
 
 #smooth-content {
   min-height: 100vh;
+  overflow: visible;
 }
 
 body, div, section, nav, footer, form, table, article, img, iframe, input, textarea, optgroup, select, button, ul, ol, li, a, h1, h2, h3, h4, h5, h6, p  {

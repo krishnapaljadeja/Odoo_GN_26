@@ -3,10 +3,10 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Select = React.forwardRef(({ className, children, ...props }, ref) => (
-  <span className={cn("relative block", className)}>
+  <span className={cn("relative block min-w-[10rem]", className)}>
     <select
       ref={ref}
-      className="ui-input w-full appearance-none pr-10"
+      className="ui-input w-full appearance-none pr-11"
       {...props}
     >
       {children}
@@ -14,7 +14,7 @@ export const Select = React.forwardRef(({ className, children, ...props }, ref) 
     <ChevronDown
       aria-hidden="true"
       size={18}
-      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400"
     />
   </span>
 ));
