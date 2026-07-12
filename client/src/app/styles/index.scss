@@ -162,6 +162,7 @@ code, pre, .mono-text, .badge, .ui-badge, td.font-medium, .asset-tag, .font-spac
   border-radius: 4px !important;
   box-sizing: border-box;
   color: #f5f3f0 !important;
+  color-scheme: dark;
   display: block;
   font-size: 0.875rem;
   min-height: 2.5rem;
@@ -180,6 +181,16 @@ code, pre, .mono-text, .badge, .ui-badge, td.font-medium, .asset-tag, .font-spac
 
   &[aria-invalid="true"] {
     border-color: #f2b25a !important;
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(86%) sepia(10%) saturate(165%) hue-rotate(346deg) brightness(109%) contrast(92%);
+    opacity: 0.85;
+  }
+
+  &::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 }
 
