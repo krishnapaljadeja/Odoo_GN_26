@@ -65,7 +65,7 @@ const TopBar = () => {
             {(user.name || user.username || "?").slice(0, 1).toUpperCase()}
           </span>
           <span className="max-w-[10rem] truncate">{user.name || user.username}</span>
-          <span className="rounded-full border border-emerald-800 bg-emerald-950/60 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+          <span className="rounded-full border border-amber-800 bg-amber-950/60 px-2 py-0.5 text-[11px] font-medium text-amber-400">
             {ROLE_LABEL[user.role] || user.role}
           </span>
           <ChevronDown size={14} className="text-zinc-500" />
