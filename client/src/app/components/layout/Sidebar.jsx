@@ -12,6 +12,7 @@ import {
   BarChart3,
   Bell,
 } from "lucide-react";
+import { AssetFlowLogo } from "../brand";
 
 // Exact order from the mockup sidebar (every internal screen).
 const NAV_ITEMS = [
@@ -47,16 +48,9 @@ export const SidebarLinks = ({ compact = false }) => {
 };
 
 const Sidebar = () => {
-  const role = useSelector((state) => state.auth.user.role);
-
   return (
     <nav className="flex h-full flex-col gap-1 p-3 border-r border-[#2a2826] bg-[#141312] font-space-mono">
-      <div className="mb-4 flex items-center gap-2 px-2 py-2">
-        <div className="flex h-5 w-5 items-center justify-center rounded bg-[#f2b25a] text-[11px] font-bold text-zinc-950">
-          A
-        </div>
-        <span className="text-base font-bold tracking-tight text-zinc-50">AssetFlow</span>
-      </div>
+      <AssetFlowLogo className="mb-4 px-2 py-2" />
 
       <SidebarLinks />
     </nav>

@@ -9,15 +9,16 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import SignoutButton from "../SignoutButton";
+import { AssetFlowLogo } from "../../components/brand";
 
 const NavbarMain = () => {
   const auth = useSelector((state) => state.auth);
   return (
     <nav className="Navbar">
       <div className="inner container is-fixed">
-        
+        <AssetFlowLogo />
+
         <div className="nav-links">
-          
           {auth.isAuthenticated ? (
             <React.Fragment>
               <SignoutButton />

@@ -10,6 +10,7 @@ import { signupSchema, verifySignupSchema } from "@/features/auth/schemas";
 import { getApiMessage } from "@/lib/api";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "../../components/ui";
 import { Reveal } from "../../components/animation";
+import { AssetFlowLogo } from "../../components/brand";
 
 const Signup = () => {
   const history = useHistory();
@@ -59,12 +60,10 @@ const Signup = () => {
       <Reveal>
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <AssetFlowLogo as="div" className="auth-brand mx-auto mb-4" />
             <CardTitle className="text-xl">
-              {pendingEmail ? "AssetFlow - verify email" : "AssetFlow - create account"}
+              {pendingEmail ? "Verify email" : "Create account"}
             </CardTitle>
-            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#f2b25a] bg-[#f2b25a]/10 text-base font-bold font-mono text-[#f2b25a]">
-              AF
-            </div>
           </CardHeader>
           <CardContent>
             {!pendingEmail ? (
