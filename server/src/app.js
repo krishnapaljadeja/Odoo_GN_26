@@ -39,5 +39,7 @@ app.use("/api/user", require("./routes/api/user"));
 app.use("/api/org", require("./routes/org"));
 app.use("/api/uploads", require("./routes/uploads"));
 app.use("/api/assets", require("./routes/assets"));
+app.use("/api/allocations", require("./routes/allocations"));
+app.use("/api/transfers", require("./routes/transfers"));
 
 module.exports = app;

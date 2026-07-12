@@ -112,7 +112,10 @@ const listAssets = async (query) => {
 const assetDetailInclude = {
   category: true,
   department: true,
-  allocations: { orderBy: { allocatedAt: "desc" }, include: { user: { select: { id: true, name: true, email: true } } } },
+  allocations: {
+    orderBy: { allocatedAt: "desc" },
+    include: { user: { select: { id: true, name: true, email: true, department: { select: { id: true, name: true } } } } },
+  },
   maintenance: { orderBy: { createdAt: "desc" } },
   bookings: { orderBy: { startTime: "desc" }, include: { user: { select: { id: true, name: true } } } },
   auditItems: { orderBy: { id: "desc" }, include: { cycle: { select: { id: true, title: true } } } },
