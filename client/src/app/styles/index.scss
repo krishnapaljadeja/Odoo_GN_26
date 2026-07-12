@@ -236,6 +236,18 @@ code, pre, .mono-text, .badge, .ui-badge, td.font-medium, .asset-tag, .font-spac
   }
 }
 
+/* Utility: hide visible scrollbars but keep scroll behavior (mouse/touch/keyboard) */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+    width: 0;
+    height: 0;
+  }
+}
+
 /***** Media Query Blocks *****/
 
 /*

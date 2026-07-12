@@ -183,6 +183,7 @@ const AllocateTransferTab = () => {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [assetDetail, setAssetDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialAssets, setInitialAssets] = useState([]);
 
   const loadDetail = useCallback((assetId, { silent = false } = {}) => {
     if (!assetId) return;
@@ -201,6 +202,20 @@ const AllocateTransferTab = () => {
   }, [selectedAsset]);
   useLiveRefresh(() => loadDetail(selectedAsset?.id, { silent: true }), { enabled: Boolean(selectedAsset), deps: [selectedAsset?.id] });
 
+  // preload a small list of available assets on mount
+  useEffect(() => {
+    let mounted = true;
+    assetsApi
+      .list({ limit: 12, status: "AVAILABLE" })
+      .then((res) => {
+        if (mounted) setInitialAssets(res.payload.data);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const activeAllocation = assetDetail?.allocations?.find((a) => a.status === "ACTIVE");
   const isCurrentHolder = activeAllocation?.user?.id === user.id;
   const canRequestTransfer = canManage || isCurrentHolder;
@@ -212,7 +227,7 @@ const AllocateTransferTab = () => {
           <CardContent>
             <label className="grid gap-2 text-sm font-medium text-zinc-300">
               <span>Asset</span>
-              <AssetCombobox value={selectedAsset} onChange={setSelectedAsset} />
+                  <AssetCombobox value={selectedAsset} onChange={setSelectedAsset} initialResults={initialAssets} openOnMount={true} />
             </label>
           </CardContent>
         </Card>
