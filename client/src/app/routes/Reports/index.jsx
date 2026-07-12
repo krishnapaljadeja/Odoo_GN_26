@@ -14,7 +14,7 @@ const Bar = ({ value, max = 100, label }) => (
       <span>{value}</span>
     </div>
     <div className="h-2 rounded-full bg-zinc-800">
-      <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${Math.min(100, max ? (value / max) * 100 : 0)}%` }} />
+      <div className="h-2 rounded-full bg-amber-500" style={{ width: `${Math.min(100, max ? (value / max) * 100 : 0)}%` }} />
     </div>
   </div>
 );
@@ -181,7 +181,7 @@ const Reports = () => {
                           <div
                             key={`${day}-${hour}`}
                             className="rounded border border-zinc-800 py-2 text-center text-zinc-200"
-                            style={{ backgroundColor: `rgba(16,185,129,${0.08 + (value / heatMax) * 0.55})` }}
+                            style={{ backgroundColor: `rgba(242,178,90,${0.08 + (value / heatMax) * 0.55})` }}
                           >
                             {value}
                           </div>
