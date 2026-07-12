@@ -166,8 +166,8 @@ const Maintenance = () => {
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Input placeholder="Search asset or issue..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
-        <Select value={priority} onChange={(e) => setPriority(e.target.value)} className="max-w-[10rem]">
+        <Input placeholder="Search asset or issue..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs min-w-[14rem]" />
+        <Select value={priority} onChange={(e) => setPriority(e.target.value)} className="max-w-[10rem] min-w-[10rem]">
           <option value="">All priorities</option>
           <option value="LOW">Low</option>
           <option value="MEDIUM">Medium</option>
@@ -187,38 +187,67 @@ const Maintenance = () => {
         isEmpty={requests.length === 0}
         empty={<EmptyState title="No maintenance requests yet" actionLabel="Raise Request" onAction={() => setRaiseOpen(true)} />}
       >
-        <div className="grid gap-4 overflow-x-auto pb-2 lg:grid-cols-5">
-          {COLUMNS.map((column) => (
-            <section key={column.key} className="min-h-[28rem] min-w-[16rem] rounded-lg border border-zinc-800 bg-zinc-950">
-              <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-3">
-                <h2 className="text-sm font-semibold text-zinc-100">{column.title}</h2>
-                <Badge>{grouped[column.key]?.length || 0}</Badge>
-              </div>
-              <div className="grid gap-3 p-3">
-                {(grouped[column.key] || []).length === 0 ? (
-                  <div className="rounded-md border border-dashed border-zinc-800 p-3 text-xs text-zinc-600">No {STATUS_LABEL[column.key].toLowerCase()} cards</div>
-                ) : (
-                  grouped[column.key].map((request) => (
-                    <MaintenanceCard
-                      key={request.id}
-                      request={request}
-                      canManage={canManage}
-                      onApprove={(row) => mutate(() => maintenanceApi.approve(row.id), `${row.asset.assetTag} approved. Asset moved under maintenance.`)}
-                      onReject={setRejecting}
-                      onAssign={setAssigning}
-                      onStart={(row) => mutate(() => maintenanceApi.start(row.id), `${row.asset.assetTag} moved in progress.`)}
-                      onResolve={setResolving}
-                    />
-                  ))
-                )}
-              </div>
-            </section>
-          ))}
-        </div>
+        {showRejected ? (
+          <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-zinc-100">Rejected requests</h2>
+              <Badge variant="red">{rejected.length}</Badge>
+            </div>
+            <div className="grid gap-3">
+              {rejected.length === 0 ? (
+                <div className="rounded-md border border-dashed border-zinc-800 p-3 text-xs text-zinc-600">No rejected requests</div>
+              ) : (
+                rejected.map((request) => (
+                  <MaintenanceCard
+                    key={request.id}
+                    request={request}
+                    canManage={canManage}
+                    onApprove={(row) => mutate(() => maintenanceApi.approve(row.id), `${row.asset.assetTag} approved. Asset moved under maintenance.`)}
+                    onReject={setRejecting}
+                    onAssign={setAssigning}
+                    onStart={(row) => mutate(() => maintenanceApi.start(row.id), `${row.asset.assetTag} moved in progress.`)}
+                    onResolve={setResolving}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 overflow-x-auto pb-2 lg:grid-cols-5">
+              {COLUMNS.map((column) => (
+                <section key={column.key} className="min-h-[28rem] min-w-[16rem] rounded-lg border border-zinc-800 bg-zinc-950">
+                  <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-3">
+                    <h2 className="text-sm font-semibold text-zinc-100">{column.title}</h2>
+                    <Badge>{grouped[column.key]?.length || 0}</Badge>
+                  </div>
+                  <div className="grid gap-3 p-3">
+                    {(grouped[column.key] || []).length === 0 ? (
+                      <div className="rounded-md border border-dashed border-zinc-800 p-3 text-xs text-zinc-600">No {STATUS_LABEL[column.key].toLowerCase()} cards</div>
+                    ) : (
+                      grouped[column.key].map((request) => (
+                        <MaintenanceCard
+                          key={request.id}
+                          request={request}
+                          canManage={canManage}
+                          onApprove={(row) => mutate(() => maintenanceApi.approve(row.id), `${row.asset.assetTag} approved. Asset moved under maintenance.`)}
+                          onReject={setRejecting}
+                          onAssign={setAssigning}
+                          onStart={(row) => mutate(() => maintenanceApi.start(row.id), `${row.asset.assetTag} moved in progress.`)}
+                          onResolve={setResolving}
+                        />
+                      ))
+                    )}
+                  </div>
+                </section>
+              ))}
+            </div>
 
-        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
-          Approving a card moves the asset to under maintenance; resolving returns it to available.
-        </div>
+            <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
+              Approving a card moves the asset to under maintenance; resolving returns it to available.
+            </div>
+          </>
+        )}
       </DataState>
 
       <RaiseRequestDialog
