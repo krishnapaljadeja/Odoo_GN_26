@@ -1,21 +1,22 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Select = React.forwardRef(({ className, children, ...props }, ref) => (
-  <select
-    ref={ref}
-    className={cn(
-      "ui-input appearance-none bg-[length:1rem] bg-[right_0.75rem_center] bg-no-repeat pr-8",
-      className,
-    )}
-    style={{
-      backgroundImage:
-        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")",
-    }}
-    {...props}
-  >
-    {children}
-  </select>
+  <span className={cn("relative block", className)}>
+    <select
+      ref={ref}
+      className="ui-input w-full appearance-none pr-10"
+      {...props}
+    >
+      {children}
+    </select>
+    <ChevronDown
+      aria-hidden="true"
+      size={18}
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+    />
+  </span>
 ));
 
 Select.displayName = "Select";
