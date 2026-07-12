@@ -19,7 +19,7 @@ export const Dialog = ({ open, onOpenChange, children }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70" onClick={() => onOpenChange(false)} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-lg">{children}</div>
+      <div className="relative z-10 w-full flex items-center justify-center">{children}</div>
     </div>
   );
 };

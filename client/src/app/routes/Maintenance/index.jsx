@@ -30,7 +30,7 @@ const relativeDate = (value) => {
   return `${days}d ago`;
 };
 
-const MaintenanceCard = ({ request, canManage, onApprove, onReject, onAssign, onStart, onResolve }) => {
+const MaintenanceCard = ({ request, canManage, canWork, onApprove, onReject, onAssign, onStart, onResolve }) => {
   const technician = request.technician?.name || request.technicianName;
 
   return (
@@ -51,9 +51,9 @@ const MaintenanceCard = ({ request, canManage, onApprove, onReject, onAssign, on
         <span>{relativeDate(request.updatedAt || request.createdAt)}</span>
       </div>
 
-      {canManage && (
+      {(canManage || canWork) && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {request.status === "PENDING" && (
+          {canManage && request.status === "PENDING" && (
             <>
               <Button size="sm" onClick={() => onApprove(request)}>
                 <Check size={14} />
@@ -65,19 +65,19 @@ const MaintenanceCard = ({ request, canManage, onApprove, onReject, onAssign, on
               </Button>
             </>
           )}
-          {request.status === "APPROVED" && (
+          {canManage && request.status === "APPROVED" && (
             <Button size="sm" onClick={() => onAssign(request)}>
               <UserCog size={14} />
               Assign
             </Button>
           )}
-          {request.status === "TECHNICIAN_ASSIGNED" && (
+          {(canManage || canWork) && request.status === "TECHNICIAN_ASSIGNED" && (
             <Button size="sm" onClick={() => onStart(request)}>
               <Play size={14} />
               Start
             </Button>
           )}
-          {request.status === "IN_PROGRESS" && (
+          {(canManage || canWork) && request.status === "IN_PROGRESS" && (
             <Button size="sm" onClick={() => onResolve(request)}>
               <Check size={14} />
               Resolve
@@ -90,8 +90,8 @@ const MaintenanceCard = ({ request, canManage, onApprove, onReject, onAssign, on
 };
 
 const Maintenance = () => {
-  const role = useSelector((state) => state.auth.user.role);
-  const canManage = role === "ADMIN" || role === "ASSET_MANAGER";
+  const user = useSelector((state) => state.auth.user);
+  const canManage = user.role === "ADMIN" || user.role === "ASSET_MANAGER";
 
   const [requests, setRequests] = useState([]);
   const [assets, setAssets] = useState([]);
