@@ -15,6 +15,8 @@ const resultVariant = {
   DAMAGED: "amber",
 };
 
-export const ResultBadge = ({ result }) => <Badge variant={resultVariant[result] || "default"}>{RESULT_LABEL[result] || result}</Badge>;
+export const ResultBadge = ({ result }) =>
+  React.createElement(Badge, { variant: resultVariant[result] || "default" }, RESULT_LABEL[result] || result);
 
-export const AuditStatusBadge = ({ status }) => <Badge variant={status === "OPEN" ? "green" : "zinc"}>{status}</Badge>;
+export const AuditStatusBadge = ({ status }) =>
+  React.createElement(Badge, { variant: status === "OPEN" ? "green" : "zinc" }, status);

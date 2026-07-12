@@ -26,26 +26,34 @@ const NAV_ITEMS = [
   { to: "/notifications", label: "Notifications", icon: Bell },
 ];
 
-const Sidebar = () => {
+export const SidebarLinks = ({ compact = false }) => {
   const role = useSelector((state) => state.auth.user.role);
 
   return (
-    <nav className="flex h-full flex-col gap-1 p-3">
-      <div className="mb-3 px-2 py-2">
-        <span className="text-lg font-bold tracking-tight text-zinc-50">AssetFlow</span>
-      </div>
-
+    <>
       {NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(role)).map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
-          className="flex items-center gap-2.5 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
+          className={`flex items-center gap-2.5 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100 ${compact ? "shrink-0" : ""}`}
           activeClassName="border-zinc-700 bg-zinc-900 text-emerald-400"
         >
           <Icon size={16} aria-hidden="true" />
           {label}
         </NavLink>
       ))}
+    </>
+  );
+};
+
+const Sidebar = () => {
+  return (
+    <nav className="flex h-full flex-col gap-1 p-3">
+      <div className="mb-3 px-2 py-2">
+        <span className="text-lg font-bold tracking-tight text-zinc-50">AssetFlow</span>
+      </div>
+
+      <SidebarLinks />
     </nav>
   );
 };
