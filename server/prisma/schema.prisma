@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  loginId        String   @unique @map("login_id")
+  hashedPassword String   @map("hashed_password")
+  firstName      String   @map("first_name")
+  lastName       String?  @map("last_name")
+  emailVerified  Boolean  @default(true) @map("email_verified")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("app_user")
+}
+
+model SignupOtp {
+  id             Int      @id @default(autoincrement())
+  loginId        String   @unique @map("login_id")
+  hashedPassword String   @map("hashed_password")
+  firstName      String   @map("first_name")
+  lastName       String?  @map("last_name")
+  otpHash        String   @map("otp_hash")
+  expiresAt      DateTime @map("expires_at")
+  attempts       Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("signup_otp")
+}
