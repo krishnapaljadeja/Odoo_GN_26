@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Plus, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { Plus, ArrowDown, ArrowUp, ArrowUpDown, Columns3, List } from "lucide-react";
 import { DashboardLayout, PageHeader } from "../../components/layout";
 import { Button, Input, Select, Skeleton } from "@/components/ui";
 import { DataState, EmptyState } from "../../components/data";
@@ -45,6 +45,7 @@ const Assets = () => {
   const [categoryId, setCategoryId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [sort, setSort] = useState({ sortBy: "assetTag", sortOrder: "asc" });
+  const [view, setView] = useState("list");
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const limit = 10;
@@ -96,6 +97,15 @@ const Assets = () => {
   };
 
   const totalPages = Math.max(1, Math.ceil(result.total / limit));
+  const kanbanGroups = useMemo(
+    () =>
+      STATUS_OPTIONS.map((key) => ({
+        key,
+        label: key.replace("_", " "),
+        assets: result.data.filter((asset) => asset.status === key),
+      })).filter((group) => group.assets.length > 0),
+    [result.data],
+  );
 
   return (
     <DashboardLayout>
@@ -119,7 +129,7 @@ const Assets = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="max-w-[10rem]">
+        <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="max-w-[12rem]">
           <option value="">All categories</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -127,7 +137,7 @@ const Assets = () => {
             </option>
           ))}
         </Select>
-        <Select value={status} onChange={(e) => setStatus(e.target.value)} className="max-w-[11rem]">
+        <Select value={status} onChange={(e) => setStatus(e.target.value)} className="max-w-[13rem]">
           <option value="">All statuses</option>
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>
@@ -135,7 +145,7 @@ const Assets = () => {
             </option>
           ))}
         </Select>
-        <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} className="max-w-[10rem]">
+        <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} className="max-w-[13rem]">
           <option value="">All departments</option>
           {departments.map((d) => (
             <option key={d.id} value={d.id}>
@@ -144,6 +154,28 @@ const Assets = () => {
           ))}
         </Select>
         <span className="text-xs text-zinc-500">{result.total} assets</span>
+        <div className="ml-auto flex rounded-md border border-zinc-800 p-1">
+          <Button
+            type="button"
+            variant={view === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setView("list")}
+            title="List view"
+            aria-label="List view"
+          >
+            <List size={15} />
+          </Button>
+          <Button
+            type="button"
+            variant={view === "kanban" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setView("kanban")}
+            title="Kanban view"
+            aria-label="Kanban view"
+          >
+            <Columns3 size={15} />
+          </Button>
+        </div>
       </div>
 
       <DataState
@@ -162,40 +194,76 @@ const Assets = () => {
           <Skeleton className="h-64 w-full" />
         ) : (
           <>
-            <div className="overflow-x-auto rounded-lg border border-zinc-800">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-zinc-800 bg-zinc-900/60">
-                  <tr>
-                    <SortableHeader label="Tag" sortKey="assetTag" sort={sort} onSort={onSort} />
-                    <SortableHeader label="Name" sortKey="name" sort={sort} onSort={onSort} />
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Category</th>
-                    <SortableHeader label="Status" sortKey="status" sort={sort} onSort={onSort} />
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Location</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Department</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Condition</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800">
-                  {result.data.map((asset) => (
-                    <tr
-                      key={asset.id}
-                      className="cursor-pointer text-zinc-200 hover:bg-zinc-900/60"
-                      onClick={() => history.push(`/assets/${asset.id}`)}
-                    >
-                      <td className="px-4 py-3 font-medium">{asset.assetTag}</td>
-                      <td className="px-4 py-3">{asset.name}</td>
-                      <td className="px-4 py-3 text-zinc-400">{asset.category?.name || "—"}</td>
-                      <td className="px-4 py-3">
-                        <AssetStatusBadge status={asset.status} />
-                      </td>
-                      <td className="px-4 py-3 text-zinc-400">{asset.location || "—"}</td>
-                      <td className="px-4 py-3 text-zinc-400">{asset.department?.name || "—"}</td>
-                      <td className="px-4 py-3 text-zinc-400">{CONDITION_LABEL[asset.condition]}</td>
+            {view === "list" ? (
+              <div className="overflow-x-auto rounded-lg border border-zinc-800">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-zinc-800 bg-zinc-900/60">
+                    <tr>
+                      <SortableHeader label="Tag" sortKey="assetTag" sort={sort} onSort={onSort} />
+                      <SortableHeader label="Name" sortKey="name" sort={sort} onSort={onSort} />
+                      <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Category</th>
+                      <SortableHeader label="Status" sortKey="status" sort={sort} onSort={onSort} />
+                      <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Location</th>
+                      <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Department</th>
+                      <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500">Condition</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800">
+                    {result.data.map((asset) => (
+                      <tr
+                        key={asset.id}
+                        className="cursor-pointer text-zinc-200 hover:bg-zinc-900/60"
+                        onClick={() => history.push(`/assets/${asset.id}`)}
+                      >
+                        <td className="px-4 py-3 font-medium">{asset.assetTag}</td>
+                        <td className="px-4 py-3">{asset.name}</td>
+                        <td className="px-4 py-3 text-zinc-400">{asset.category?.name || "-"}</td>
+                        <td className="px-4 py-3">
+                          <AssetStatusBadge status={asset.status} />
+                        </td>
+                        <td className="px-4 py-3 text-zinc-400">{asset.location || "-"}</td>
+                        <td className="px-4 py-3 text-zinc-400">{asset.department?.name || "-"}</td>
+                        <td className="px-4 py-3 text-zinc-400">{CONDITION_LABEL[asset.condition]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+                {kanbanGroups.map((group) => (
+                  <section key={group.key} className="rounded-lg border border-zinc-800 bg-zinc-950">
+                    <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+                      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{group.label}</h2>
+                      <span className="text-xs text-zinc-500">{group.assets.length}</span>
+                    </div>
+                    <div className="grid gap-3 p-3">
+                      {group.assets.map((asset) => (
+                        <button
+                          key={asset.id}
+                          type="button"
+                          onClick={() => history.push(`/assets/${asset.id}`)}
+                          className="grid gap-2 rounded-md border border-zinc-800 bg-zinc-900/50 p-3 text-left text-sm transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="font-semibold text-zinc-100">{asset.assetTag}</span>
+                            <AssetStatusBadge status={asset.status} />
+                          </div>
+                          <div className="text-zinc-200">{asset.name}</div>
+                          <div className="grid gap-1 text-xs text-zinc-500">
+                            <span>{asset.category?.name || "Uncategorized"}</span>
+                            <span>
+                              {asset.location || "No location"} / {asset.department?.name || "No department"}
+                            </span>
+                            <span>Condition: {CONDITION_LABEL[asset.condition]}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
 
             <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
               <span>

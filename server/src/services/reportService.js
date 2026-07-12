@@ -17,10 +17,49 @@ const scopeAllocationWhere = (actor) => {
 
 const scopeBookingWhere = (actor) => (actor.role === "EMPLOYEE" ? { userId: actor.id } : {});
 
+const scopeMaintenanceWhere = (actor) => {
+  if (actor.role === "DEPARTMENT_HEAD") return { asset: { departmentId: actor.departmentId || -1 } };
+  if (actor.role === "EMPLOYEE") return { OR: [{ requesterId: actor.id }, { technicianId: actor.id }] };
+  return {};
+};
+
+const scopedActivityWhere = async (actor) => {
+  if (MANAGER_ROLES.includes(actor.role)) return {};
+
+  const [maintenanceRows, transferRows] = await Promise.all([
+    prisma.maintenanceRequest.findMany({ where: scopeMaintenanceWhere(actor), select: { id: true } }),
+    prisma.transferRequest.findMany({
+      where:
+        actor.role === "EMPLOYEE"
+          ? { OR: [{ fromUserId: actor.id }, { toUserId: actor.id }] }
+          : {
+              OR: [
+                { fromUser: { departmentId: actor.departmentId || -1 } },
+                { toUser: { departmentId: actor.departmentId || -1 } },
+              ],
+            },
+      select: { id: true },
+    }),
+  ]);
+
+  const maintenanceIds = maintenanceRows.map((row) => row.id);
+  const transferIds = transferRows.map((row) => row.id);
+
+  return {
+    OR: [
+      { actorId: actor.id },
+      ...(maintenanceIds.length ? [{ entity: "MaintenanceRequest", entityId: { in: maintenanceIds } }] : []),
+      ...(transferIds.length ? [{ entity: "TransferRequest", entityId: { in: transferIds } }] : []),
+    ],
+  };
+};
+
 const getKpis = async (actor) => {
   const assetScope = scopeAssetWhere(actor);
   const allocationScope = scopeAllocationWhere(actor);
   const bookingScope = scopeBookingWhere(actor);
+  const maintenanceScope = scopeMaintenanceWhere(actor);
+  const activityWhere = await scopedActivityWhere(actor);
   const now = new Date();
   const in7Days = new Date(now.getTime() + 7 * 86400000);
 
@@ -42,8 +81,11 @@ const getKpis = async (actor) => {
     prisma.transferRequest.count({ where: { status: "REQUESTED" } }),
     prisma.allocation.count({ where: { ...allocationScope, status: "ACTIVE", expectedReturnDate: { gte: now, lte: in7Days } } }),
     prisma.allocation.count({ where: { ...allocationScope, status: "ACTIVE", expectedReturnDate: { lt: now } } }),
-    prisma.maintenanceRequest.count({ where: { status: { in: ["APPROVED", "TECHNICIAN_ASSIGNED", "IN_PROGRESS"] } } }),
+    prisma.maintenanceRequest.count({
+      where: { ...maintenanceScope, status: { in: ["APPROVED", "TECHNICIAN_ASSIGNED", "IN_PROGRESS"] } },
+    }),
     prisma.activityLog.findMany({
+      where: activityWhere,
       include: { actor: { select: { name: true, email: true } } },
       orderBy: { createdAt: "desc" },
       take: 8,

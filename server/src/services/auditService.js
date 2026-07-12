@@ -74,6 +74,14 @@ const notifyManagers = async (tx, { title, body, meta }) => {
   });
 };
 
+const notifyAuditors = async (tx, auditorIds, { title, body, meta }) => {
+  const uniqueIds = [...new Set(auditorIds.filter(Boolean))];
+  if (uniqueIds.length === 0) return;
+  await tx.notification.createMany({
+    data: uniqueIds.map((userId) => ({ userId, type: "AUDIT_ASSIGNED", title, body, meta })),
+  });
+};
+
 const listAudits = async (query, actor) => {
   const { skip, take, page, limit, search, sortBy, sortOrder } = parseListQuery(query, {
     defaultSortBy: "createdAt",
@@ -160,6 +168,12 @@ const createAudit = async (actor, { title, scopeDeptId, scopeLocation, startDate
       details: { title, assetCount: assets.length, auditorIds },
     });
 
+    await notifyAuditors(tx, auditorIds, {
+      title: `Audit assigned: ${title}`,
+      body: `${assets.length} assets are ready for verification.`,
+      meta: { cycleId: cycle.id },
+    });
+
     return tx.auditCycle.findUnique({ where: { id: cycle.id }, include: cycleInclude });
   });
 };
@@ -197,6 +211,20 @@ const updateAuditItem = async (actor, cycleId, itemId, { result, notes }) => {
     });
 
     if (["MISSING", "DAMAGED"].includes(result)) {
+      await logActivity(tx, {
+        actorId: actor.id,
+        action: "AUDIT_DISCREPANCY_FLAGGED",
+        entity: "AuditItem",
+        entityId: itemId,
+        details: {
+          cycleId,
+          assetId: item.assetId,
+          assetTag: item.asset.assetTag,
+          assetName: item.asset.name,
+          result,
+          notes,
+        },
+      });
       await notifyManagers(tx, {
         title: `Audit discrepancy flagged: ${item.asset.assetTag} ${result.toLowerCase()}`,
         body: `${cycle.title} flagged ${item.asset.name}.`,
