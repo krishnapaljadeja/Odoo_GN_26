@@ -35,10 +35,10 @@ export const SidebarLinks = ({ compact = false }) => {
         <NavLink
           key={to}
           to={to}
-          className={`flex items-center gap-2.5 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100 ${compact ? "shrink-0" : ""}`}
-          activeClassName="border-zinc-700 bg-zinc-900 text-emerald-400"
+          className={`flex items-center gap-2.5 rounded border border-transparent px-3 py-2 text-xs font-semibold uppercase text-zinc-400 transition-colors hover:bg-[#1e293b] hover:text-zinc-100 ${compact ? "shrink-0" : ""}`}
+          activeClassName="border-[#1e293b] bg-[#1e293b] text-[#28E99F]"
         >
-          <Icon size={16} aria-hidden="true" />
+          <Icon size={14} aria-hidden="true" />
           {label}
         </NavLink>
       ))}
@@ -47,10 +47,15 @@ export const SidebarLinks = ({ compact = false }) => {
 };
 
 const Sidebar = () => {
+  const role = useSelector((state) => state.auth.user.role);
+
   return (
-    <nav className="flex h-full flex-col gap-1 p-3">
-      <div className="mb-3 px-2 py-2">
-        <span className="text-lg font-bold tracking-tight text-zinc-50">AssetFlow</span>
+    <nav className="flex h-full flex-col gap-1 p-3 border-r border-[#1e293b] bg-[#0b0f19] font-space-mono">
+      <div className="mb-4 px-2 py-2 flex items-center gap-2">
+        <div className="w-5 h-5 bg-[#28E99F] rounded flex items-center justify-center font-bold text-[11px] text-zinc-950">
+          A
+        </div>
+        <span className="text-base font-bold tracking-tight text-zinc-50">AssetFlow</span>
       </div>
 
       <SidebarLinks />
