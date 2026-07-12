@@ -1,8 +1,8 @@
 import React from "react";
 import { Input } from "../ui";
 
-const FormField = React.forwardRef(({ label, error, id, ...props }, ref) => (
-  <label className="grid gap-2 text-sm font-medium text-zinc-300" htmlFor={id || props.name}>
+const FormField = React.forwardRef(({ label, error, id, className, ...props }, ref) => (
+  <label className={`grid gap-2 text-sm font-medium text-zinc-300 ${className || ""}`} htmlFor={id || props.name}>
     <span>{label}</span>
     <Input ref={ref} id={id || props.name} aria-invalid={Boolean(error)} {...props} />
     {error && <span className="text-xs font-medium text-red-400">{error}</span>}
