@@ -4,7 +4,7 @@ import { Loader } from "../ui";
 const DataState = ({ isLoading, error, isEmpty, empty, children }) => {
   if (isLoading) {
     return (
-      <div className="flex min-h-40 items-center justify-center rounded-lg border border-slate-200 bg-white">
+      <div className="flex min-h-40 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900">
         <Loader label="Loading data" />
       </div>
     );
@@ -12,7 +12,7 @@ const DataState = ({ isLoading, error, isEmpty, empty, children }) => {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-lg border border-red-900/50 bg-red-950/40 p-4 text-sm text-red-400">
         {error}
       </div>
     );

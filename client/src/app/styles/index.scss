@@ -8,13 +8,14 @@
 
 /***** Global Style Defaults *****/
 html {
-  color: map.get($color, "black");
+  color: #f4f4f5;
   scroll-behavior: smooth;
 }
 
 html,
 body,
 #root {
+  background-color: #09090b;
   min-height: 100%;
 }
 
@@ -55,30 +56,30 @@ body, div, section, nav, footer, form, table, article, img, iframe, input, texta
 }
 
 .ui-button--default {
-  background: #111827;
-  color: #ffffff;
+  background: #22c55e;
+  color: #052e16;
 
   &:hover:not(:disabled) {
-    background: #1f2937;
+    background: #16a34a;
   }
 }
 
 .ui-button--outline {
-  background: #ffffff;
-  border-color: #d1d5db;
-  color: #111827;
+  background: transparent;
+  border-color: #3f3f46;
+  color: #f4f4f5;
 
   &:hover:not(:disabled) {
-    background: #f3f4f6;
+    background: #27272a;
   }
 }
 
 .ui-button--ghost {
   background: transparent;
-  color: #111827;
+  color: #d4d4d8;
 
   &:hover:not(:disabled) {
-    background: #f3f4f6;
+    background: #27272a;
   }
 }
 
@@ -114,30 +115,38 @@ body, div, section, nav, footer, form, table, article, img, iframe, input, texta
 }
 
 .ui-input {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: #18181b;
+  border: 1px solid #3f3f46;
   border-radius: 6px;
   box-sizing: border-box;
-  color: #111827;
+  color: #f4f4f5;
   display: block;
   font-size: 0.9375rem;
   min-height: 2.75rem;
   padding: 0 0.875rem;
   width: 100%;
 
+  &::placeholder {
+    color: #71717a;
+  }
+
   &:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
     outline: none;
+  }
+
+  &[aria-invalid="true"] {
+    border-color: #f87171;
   }
 }
 
 .ui-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #18181b;
+  border: 1px solid #27272a;
   border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
-  color: #111827;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  color: #f4f4f5;
 }
 
 .ui-card__header,
@@ -166,7 +175,7 @@ body, div, section, nav, footer, form, table, article, img, iframe, input, texta
 }
 
 .ui-card__description {
-  color: #6b7280;
+  color: #a1a1aa;
   font-size: 0.875rem;
   line-height: 1.5;
   margin-top: 0.375rem;
@@ -174,7 +183,7 @@ body, div, section, nav, footer, form, table, article, img, iframe, input, texta
 
 .ui-loader {
   align-items: center;
-  color: #4b5563;
+  color: #a1a1aa;
   display: inline-flex;
   gap: 0.625rem;
   justify-content: center;

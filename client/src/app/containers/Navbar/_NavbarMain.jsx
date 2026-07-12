@@ -44,7 +44,7 @@ const NavbarMain = () => {
               exact
               activeClassName="active"
               className="no-deco"
-              to="/signin"
+              to="/login"
             >
               Sign In
             </NavLink>

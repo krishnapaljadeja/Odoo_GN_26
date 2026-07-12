@@ -1,17 +1,17 @@
 import React, { useEffect, Suspense } from "react";
 import "./app/styles/index.scss";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { signout } from "./app/state/authSlice";
+import { signout, updateUser } from "./app/state/authSlice";
+import { authApi } from "./features/auth/api";
 
 import PrivateRoute from "./app/containers/PrivateRoute";
-import Navbar from "./app/containers/Navbar";
-import Footer from "./app/components/Footer";
 import Loading from "./app/components/Loading";
 import { SmoothScroll } from "./app/components/animation";
 
-const Signin = React.lazy(() => import("./app/routes/Signin"));
+const Login = React.lazy(() => import("./app/routes/Login"));
 const Signup = React.lazy(() => import("./app/routes/Signup"));
+const ForgotPassword = React.lazy(() => import("./app/routes/ForgotPassword"));
 const Landing = React.lazy(() => import("./app/routes/Landing"));
 const Dashboard = React.lazy(() => import("./app/routes/Dashboard"));
 const Private = React.lazy(() => import("./app/routes/Private"));
@@ -21,25 +21,37 @@ const App = (props) => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const expired = new Date(Date.now()) >= new Date(auth.expires);
+
   useEffect(() => {
-    const main = () => {
-      if (expired) {
-        dispatch(signout());
-      }
-    };
-    main();
+    if (expired) {
+      dispatch(signout());
+    }
   }, [dispatch, expired]);
+
+  useEffect(() => {
+    // Re-hydrate role/department from the server on load, since a Redux-
+    // persisted session can be stale after an admin promotes/demotes the
+    // user in Organization Setup.
+    if (!auth.isAuthenticated || expired) return;
+
+    authApi
+      .me()
+      .then((data) => dispatch(updateUser(data.payload)))
+      .catch(() => dispatch(signout()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.isAuthenticated]);
 
   return (
     <React.Fragment>
       <Router>
-        <Navbar />
         <SmoothScroll>
           <Suspense fallback={<Loading />}>
             <Switch>
               <Route exact path="/" {...props} component={Landing} />
-              <Route exact path="/signin" {...props} component={Signin} />
+              <Route exact path="/login" {...props} component={Login} />
               <Route exact path="/signup" {...props} component={Signup} />
+              <Route exact path="/forgot-password" {...props} component={ForgotPassword} />
+              <Redirect exact from="/signin" to="/login" />
               <PrivateRoute
                 exact
                 path="/dashboard"
@@ -54,7 +66,6 @@ const App = (props) => {
               />
             </Switch>
           </Suspense>
-          <Footer />
         </SmoothScroll>
       </Router>
     </React.Fragment>
