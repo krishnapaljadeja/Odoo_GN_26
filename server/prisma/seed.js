@@ -14,6 +14,11 @@ const todayAt = (hour, minute = 0) => {
   d.setHours(hour, minute, 0, 0);
   return d;
 };
+const dayOffsetAt = (offset, hour, minute = 0) => {
+  const d = new Date(Date.now() + offset * 24 * 60 * 60 * 1000);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+};
 
 async function main() {
   const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
@@ -39,6 +44,26 @@ async function main() {
     update: {},
     create: { name: "Field Ops (East)", status: "INACTIVE", parentId: fieldOps.id },
   });
+  const itOps = await prisma.department.upsert({
+    where: { name: "IT Operations" },
+    update: {},
+    create: { name: "IT Operations", status: "ACTIVE" },
+  });
+  const finance = await prisma.department.upsert({
+    where: { name: "Finance" },
+    update: {},
+    create: { name: "Finance", status: "ACTIVE" },
+  });
+  const hr = await prisma.department.upsert({
+    where: { name: "People Operations" },
+    update: {},
+    create: { name: "People Operations", status: "ACTIVE" },
+  });
+  const fieldOpsWest = await prisma.department.upsert({
+    where: { name: "Field Ops (West)" },
+    update: {},
+    create: { name: "Field Ops (West)", status: "ACTIVE", parentId: fieldOps.id },
+  });
 
   // ---- Categories -------------------------------------------------------
   const electronics = await prisma.assetCategory.upsert({
@@ -60,6 +85,21 @@ async function main() {
     where: { name: "Facilities & Spaces" },
     update: {},
     create: { name: "Facilities & Spaces", description: "Bookable rooms and shared spaces" },
+  });
+  const network = await prisma.assetCategory.upsert({
+    where: { name: "Network Equipment" },
+    update: {},
+    create: { name: "Network Equipment", description: "Routers, access points, firewalls and switches", customFields: { rackMounted: true } },
+  });
+  const appliances = await prisma.assetCategory.upsert({
+    where: { name: "Appliances" },
+    update: {},
+    create: { name: "Appliances", description: "Pantry, cleaning and workplace appliances" },
+  });
+  const safety = await prisma.assetCategory.upsert({
+    where: { name: "Safety Equipment" },
+    update: {},
+    create: { name: "Safety Equipment", description: "Emergency, first-aid and compliance equipment" },
   });
 
   // ---- Users --------------------------------------------------------
@@ -103,10 +143,34 @@ async function main() {
     role: "DEPARTMENT_HEAD",
     departmentId: fieldOpsEast.id,
   });
+  const nikhilMenon = await upsertUser({
+    email: "nikhil.menon@assetflow.test",
+    username: "nikhil.menon",
+    name: "Nikhil Menon",
+    role: "DEPARTMENT_HEAD",
+    departmentId: itOps.id,
+  });
+  const poojaDesai = await upsertUser({
+    email: "pooja.desai@assetflow.test",
+    username: "pooja.desai",
+    name: "Pooja Desai",
+    role: "DEPARTMENT_HEAD",
+    departmentId: finance.id,
+  });
+  const kavyaIyer = await upsertUser({
+    email: "kavya.iyer@assetflow.test",
+    username: "kavya.iyer",
+    name: "Kavya Iyer",
+    role: "DEPARTMENT_HEAD",
+    departmentId: hr.id,
+  });
 
   await prisma.department.update({ where: { id: engineering.id }, data: { headId: aditiRao.id } });
   await prisma.department.update({ where: { id: facilities.id }, data: { headId: rohanMehta.id } });
   await prisma.department.update({ where: { id: fieldOpsEast.id }, data: { headId: sanaIqbal.id } });
+  await prisma.department.update({ where: { id: itOps.id }, data: { headId: nikhilMenon.id } });
+  await prisma.department.update({ where: { id: finance.id }, data: { headId: poojaDesai.id } });
+  await prisma.department.update({ where: { id: hr.id }, data: { headId: kavyaIyer.id } });
 
   const priyaShah = await upsertUser({
     email: "priya.shah@assetflow.test",
@@ -149,6 +213,56 @@ async function main() {
     name: "Meera Joshi",
     role: "EMPLOYEE",
     departmentId: fieldOpsEast.id,
+  });
+  const farahKhan = await upsertUser({
+    email: "farah.khan@assetflow.test",
+    username: "farah.khan",
+    name: "Farah Khan",
+    role: "EMPLOYEE",
+    departmentId: itOps.id,
+  });
+  const omPrakash = await upsertUser({
+    email: "om.prakash@assetflow.test",
+    username: "om.prakash",
+    name: "Om Prakash",
+    role: "EMPLOYEE",
+    departmentId: itOps.id,
+  });
+  const ananyaSen = await upsertUser({
+    email: "ananya.sen@assetflow.test",
+    username: "ananya.sen",
+    name: "Ananya Sen",
+    role: "EMPLOYEE",
+    departmentId: finance.id,
+  });
+  const devPatel = await upsertUser({
+    email: "dev.patel@assetflow.test",
+    username: "dev.patel",
+    name: "Dev Patel",
+    role: "EMPLOYEE",
+    departmentId: finance.id,
+  });
+  const taraDutta = await upsertUser({
+    email: "tara.dutta@assetflow.test",
+    username: "tara.dutta",
+    name: "Tara Dutta",
+    role: "EMPLOYEE",
+    departmentId: hr.id,
+  });
+  const imranSheikh = await upsertUser({
+    email: "imran.sheikh@assetflow.test",
+    username: "imran.sheikh",
+    name: "Imran Sheikh",
+    role: "EMPLOYEE",
+    departmentId: fieldOpsWest.id,
+  });
+  const leenaNair = await upsertUser({
+    email: "leena.nair@assetflow.test",
+    username: "leena.nair",
+    name: "Leena Nair",
+    role: "EMPLOYEE",
+    departmentId: facilities.id,
+    status: "INACTIVE",
   });
 
   // ---- Assets -----------------------------------------------------------
@@ -385,6 +499,217 @@ async function main() {
     status: "AVAILABLE",
     location: "Warehouse",
   });
+  const af0448 = await upsertAsset({
+    assetTag: "AF-0448",
+    name: "MacBook Pro",
+    categoryId: electronics.id,
+    serialNumber: "SN-0448-MBP",
+    acquisitionDate: daysAgo(180),
+    acquisitionCost: 185000,
+    condition: "NEW",
+    status: "ALLOCATED",
+    location: "Desk IT04",
+    departmentId: itOps.id,
+    isBookable: false,
+  });
+  const af0449 = await upsertAsset({
+    assetTag: "AF-0449",
+    name: "ThinkPad Laptop",
+    categoryId: electronics.id,
+    serialNumber: "SN-0449-TP",
+    acquisitionDate: daysAgo(220),
+    acquisitionCost: 92000,
+    condition: "GOOD",
+    status: "ALLOCATED",
+    location: "Finance Bay",
+    departmentId: finance.id,
+    isBookable: false,
+  });
+  const af0450 = await upsertAsset({
+    assetTag: "AF-0450",
+    name: "Ultrawide Monitor",
+    categoryId: electronics.id,
+    serialNumber: "SN-0450-UW",
+    acquisitionDate: daysAgo(210),
+    acquisitionCost: 36000,
+    condition: "GOOD",
+    status: "ALLOCATED",
+    location: "Finance Bay",
+    departmentId: finance.id,
+    isBookable: false,
+  });
+  const af0451 = await upsertAsset({
+    assetTag: "AF-0451",
+    name: "Cisco Firewall",
+    categoryId: network.id,
+    serialNumber: "SN-0451-FW",
+    acquisitionDate: daysAgo(540),
+    acquisitionCost: 140000,
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "Server Room Rack A",
+    departmentId: itOps.id,
+    isBookable: false,
+  });
+  const af0452 = await upsertAsset({
+    assetTag: "AF-0452",
+    name: "48-Port Switch",
+    categoryId: network.id,
+    serialNumber: "SN-0452-SW",
+    acquisitionDate: daysAgo(620),
+    acquisitionCost: 78000,
+    condition: "FAIR",
+    status: "UNDER_MAINTENANCE",
+    location: "Server Room Rack B",
+    departmentId: itOps.id,
+    isBookable: false,
+  });
+  const af0453 = await upsertAsset({
+    assetTag: "AF-0453",
+    name: "Wi-Fi Access Point",
+    categoryId: network.id,
+    serialNumber: "SN-0453-AP",
+    acquisitionDate: daysAgo(330),
+    acquisitionCost: 22000,
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "HQ Floor 4",
+    departmentId: itOps.id,
+    isBookable: false,
+  });
+  const af0454 = await upsertAsset({
+    assetTag: "AF-0454",
+    name: "Standing Desk",
+    categoryId: furniture.id,
+    serialNumber: "SN-0454-SD",
+    acquisitionDate: daysAgo(260),
+    acquisitionCost: 28000,
+    condition: "GOOD",
+    status: "ALLOCATED",
+    location: "People Ops Bay",
+    departmentId: hr.id,
+  });
+  const af0455 = await upsertAsset({
+    assetTag: "AF-0455",
+    name: "Meeting Pod Alpha",
+    categoryId: facilitiesCategory.id,
+    serialNumber: "SN-0455-POD",
+    acquisitionDate: daysAgo(150),
+    acquisitionCost: 350000,
+    condition: "NEW",
+    status: "AVAILABLE",
+    location: "HQ Floor 4",
+    departmentId: facilities.id,
+    isBookable: true,
+  });
+  const af0456 = await upsertAsset({
+    assetTag: "AF-0456",
+    name: "Training Room C1",
+    categoryId: facilitiesCategory.id,
+    acquisitionDate: daysAgo(1000),
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "HQ Floor 1",
+    departmentId: hr.id,
+    isBookable: true,
+  });
+  const af0457 = await upsertAsset({
+    assetTag: "AF-0457",
+    name: "Espresso Machine",
+    categoryId: appliances.id,
+    serialNumber: "SN-0457-EM",
+    acquisitionDate: daysAgo(430),
+    acquisitionCost: 48000,
+    condition: "FAIR",
+    status: "UNDER_MAINTENANCE",
+    location: "Pantry Floor 3",
+    departmentId: facilities.id,
+  });
+  const af0458 = await upsertAsset({
+    assetTag: "AF-0458",
+    name: "First Aid Station",
+    categoryId: safety.id,
+    serialNumber: "SN-0458-FA",
+    acquisitionDate: daysAgo(365),
+    acquisitionCost: 12000,
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "Reception",
+    departmentId: facilities.id,
+  });
+  const af0459 = await upsertAsset({
+    assetTag: "AF-0459",
+    name: "Fire Extinguisher Set",
+    categoryId: safety.id,
+    serialNumber: "SN-0459-FE",
+    acquisitionDate: daysAgo(720),
+    acquisitionCost: 18000,
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "Warehouse",
+    departmentId: fieldOpsWest.id,
+  });
+  const af0460 = await upsertAsset({
+    assetTag: "AF-0460",
+    name: "Field Tablet",
+    categoryId: electronics.id,
+    serialNumber: "SN-0460-TB",
+    acquisitionDate: daysAgo(310),
+    acquisitionCost: 45000,
+    condition: "DAMAGED",
+    status: "UNDER_MAINTENANCE",
+    location: "West Depot",
+    departmentId: fieldOpsWest.id,
+  });
+  const af0461 = await upsertAsset({
+    assetTag: "AF-0461",
+    name: "Delivery Van",
+    categoryId: vehicles.id,
+    serialNumber: "SN-0461-VN",
+    acquisitionDate: daysAgo(820),
+    acquisitionCost: 980000,
+    condition: "GOOD",
+    status: "RESERVED",
+    location: "West Depot",
+    departmentId: fieldOpsWest.id,
+    isBookable: true,
+  });
+  const af0462 = await upsertAsset({
+    assetTag: "AF-0462",
+    name: "Scanner",
+    categoryId: electronics.id,
+    serialNumber: "SN-0462-SC",
+    acquisitionDate: daysAgo(470),
+    acquisitionCost: 24000,
+    condition: "POOR",
+    status: "RETIRED",
+    location: "Archive Room",
+    departmentId: finance.id,
+  });
+  const af0463 = await upsertAsset({
+    assetTag: "AF-0463",
+    name: "Visitor Badge Printer",
+    categoryId: electronics.id,
+    serialNumber: "SN-0463-BP",
+    acquisitionDate: daysAgo(390),
+    acquisitionCost: 31000,
+    condition: "GOOD",
+    status: "AVAILABLE",
+    location: "Reception",
+    departmentId: hr.id,
+  });
+  const af0464 = await upsertAsset({
+    assetTag: "AF-0464",
+    name: "Ergonomic Chair",
+    categoryId: furniture.id,
+    serialNumber: "SN-0464-EC",
+    acquisitionDate: daysAgo(190),
+    acquisitionCost: 11500,
+    condition: "GOOD",
+    status: "ALLOCATED",
+    location: "Desk HR07",
+    departmentId: hr.id,
+  });
 
   // ---- Transactional demo data (allocations/transfers/bookings/etc) -----
   // Not upserted (no natural unique key) - guard so re-running the seed
@@ -445,6 +770,45 @@ async function main() {
   await prisma.allocation.create({
     data: { assetId: af9838.id, userId: nehaKapoor.id, departmentId: engineering.id, allocatedAt: daysAgo(180), status: "ACTIVE" },
   });
+  await prisma.allocation.create({
+    data: { assetId: af0448.id, userId: farahKhan.id, departmentId: itOps.id, expectedReturnDate: daysFromNow(120), allocatedAt: daysAgo(48), status: "ACTIVE" },
+  });
+  await prisma.allocation.create({
+    data: { assetId: af0449.id, userId: ananyaSen.id, departmentId: finance.id, expectedReturnDate: daysFromNow(90), allocatedAt: daysAgo(34), status: "ACTIVE" },
+  });
+  await prisma.allocation.create({
+    data: { assetId: af0450.id, userId: devPatel.id, departmentId: finance.id, allocatedAt: daysAgo(33), status: "ACTIVE" },
+  });
+  await prisma.allocation.create({
+    data: { assetId: af0454.id, userId: taraDutta.id, departmentId: hr.id, allocatedAt: daysAgo(80), status: "ACTIVE" },
+  });
+  await prisma.allocation.create({
+    data: { assetId: af0464.id, userId: kavyaIyer.id, departmentId: hr.id, allocatedAt: daysAgo(41), status: "ACTIVE" },
+  });
+  await prisma.allocation.create({
+    data: {
+      assetId: af0301.id,
+      userId: arjunNair.id,
+      departmentId: engineering.id,
+      allocatedAt: daysAgo(210),
+      returnedAt: daysAgo(75),
+      returnCondition: "GOOD",
+      checkInNotes: "Camera kit returned with all accessories",
+      status: "RETURNED",
+    },
+  });
+  await prisma.allocation.create({
+    data: {
+      assetId: af0462.id,
+      userId: poojaDesai.id,
+      departmentId: finance.id,
+      allocatedAt: daysAgo(500),
+      returnedAt: daysAgo(15),
+      returnCondition: "POOR",
+      checkInNotes: "Scanner retired after repeated paper-feed failure",
+      status: "RETURNED",
+    },
+  });
 
   // ---- Pending transfer requests -----------------------------------------
   await prisma.transferRequest.create({
@@ -474,6 +838,28 @@ async function main() {
       status: "REQUESTED",
     },
   });
+  await prisma.transferRequest.create({
+    data: {
+      assetId: af0450.id,
+      fromUserId: devPatel.id,
+      toUserId: ananyaSen.id,
+      reason: "Finance reporting station is being consolidated",
+      status: "APPROVED",
+      decidedById: assetManager.id,
+      decidedAt: daysAgo(1),
+    },
+  });
+  await prisma.transferRequest.create({
+    data: {
+      assetId: af0454.id,
+      fromUserId: taraDutta.id,
+      toUserId: farahKhan.id,
+      reason: "IT onboarding room needs an adjustable workstation",
+      status: "REJECTED",
+      decidedById: rohanMehta.id,
+      decidedAt: daysAgo(4),
+    },
+  });
 
   // ---- Bookings: Room B2 9:00-10:00 today (the overlap-demo booking) -----
   await prisma.booking.create({
@@ -497,7 +883,64 @@ async function main() {
     },
   });
   await prisma.booking.create({
-    data: { assetId: af0343.id, userId: meeraJoshi.id, startTime: daysAgo(2), endTime: daysAgo(2), purpose: "Client delivery run", status: "COMPLETED" },
+    data: {
+      assetId: af0343.id,
+      userId: meeraJoshi.id,
+      startTime: dayOffsetAt(-2, 10, 0),
+      endTime: dayOffsetAt(-2, 13, 30),
+      purpose: "Client delivery run",
+      status: "COMPLETED",
+    },
+  });
+  await prisma.booking.create({
+    data: {
+      assetId: af0455.id,
+      userId: nikhilMenon.id,
+      startTime: todayAt(11, 30),
+      endTime: todayAt(12, 30),
+      purpose: "Network rollout review",
+      status: "UPCOMING",
+    },
+  });
+  await prisma.booking.create({
+    data: {
+      assetId: af0456.id,
+      userId: kavyaIyer.id,
+      startTime: dayOffsetAt(1, 9, 30),
+      endTime: dayOffsetAt(1, 12, 0),
+      purpose: "New hire orientation",
+      status: "UPCOMING",
+    },
+  });
+  await prisma.booking.create({
+    data: {
+      assetId: af0461.id,
+      userId: imranSheikh.id,
+      startTime: todayAt(16, 0),
+      endTime: todayAt(18, 0),
+      purpose: "Parts pickup from supplier",
+      status: "UPCOMING",
+    },
+  });
+  await prisma.booking.create({
+    data: {
+      assetId: af0335.id,
+      userId: sanaIqbal.id,
+      startTime: dayOffsetAt(-7, 15, 0),
+      endTime: dayOffsetAt(-7, 16, 30),
+      purpose: "Quarterly field review",
+      status: "COMPLETED",
+    },
+  });
+  await prisma.booking.create({
+    data: {
+      assetId: af0301.id,
+      userId: priyaShah.id,
+      startTime: dayOffsetAt(-1, 11, 0),
+      endTime: dayOffsetAt(-1, 12, 0),
+      purpose: "Product photography",
+      status: "CANCELLED",
+    },
   });
 
   // ---- Maintenance requests (Kanban demo) --------------------------------
@@ -550,6 +993,45 @@ async function main() {
       resolvedAt: daysAgo(5),
     },
   });
+  await prisma.maintenanceRequest.create({
+    data: {
+      assetId: af0452.id,
+      requesterId: nikhilMenon.id,
+      description: "Intermittent packet drops on floor 4 uplink switch",
+      priority: "CRITICAL",
+      technicianName: "NetOps Vendor",
+      status: "IN_PROGRESS",
+    },
+  });
+  await prisma.maintenanceRequest.create({
+    data: {
+      assetId: af0457.id,
+      requesterId: rohanMehta.id,
+      description: "Espresso machine leaking near drip tray",
+      priority: "LOW",
+      status: "PENDING",
+    },
+  });
+  await prisma.maintenanceRequest.create({
+    data: {
+      assetId: af0460.id,
+      requesterId: imranSheikh.id,
+      description: "Tablet screen cracked after field inspection",
+      priority: "HIGH",
+      technicianName: "Device Care Center",
+      status: "TECHNICIAN_ASSIGNED",
+    },
+  });
+  await prisma.maintenanceRequest.create({
+    data: {
+      assetId: af0463.id,
+      requesterId: taraDutta.id,
+      description: "Badge printer ribbon calibration requested",
+      priority: "LOW",
+      rejectionReason: "Printer passed self-test; user guidance sent",
+      status: "REJECTED",
+    },
+  });
 
   // ---- Audit cycle: Q3 audit - Engineering dept --------------------------
   const q3Audit = await prisma.auditCycle.create({
@@ -594,6 +1076,53 @@ async function main() {
         notes: "Cracked screen bezel",
         verifiedById: sanaIqbal.id,
         verifiedAt: daysAgo(1),
+      },
+    ],
+  });
+
+  const westDepotAudit = await prisma.auditCycle.create({
+    data: {
+      title: "West Depot safety and fleet audit",
+      scopeDeptId: fieldOpsWest.id,
+      scopeLocation: "West Depot",
+      startDate: daysAgo(20),
+      endDate: daysAgo(3),
+      status: "CLOSED",
+      closedAt: daysAgo(2),
+    },
+  });
+  await prisma.auditAssignment.createMany({
+    data: [
+      { cycleId: westDepotAudit.id, auditorId: sanaIqbal.id },
+      { cycleId: westDepotAudit.id, auditorId: nikhilMenon.id },
+    ],
+  });
+  await prisma.auditItem.createMany({
+    data: [
+      {
+        cycleId: westDepotAudit.id,
+        assetId: af0461.id,
+        expectedLocation: "West Depot",
+        result: "VERIFIED",
+        verifiedById: sanaIqbal.id,
+        verifiedAt: daysAgo(4),
+      },
+      {
+        cycleId: westDepotAudit.id,
+        assetId: af0460.id,
+        expectedLocation: "West Depot",
+        result: "DAMAGED",
+        notes: "Screen damage documented and maintenance ticket opened",
+        verifiedById: nikhilMenon.id,
+        verifiedAt: daysAgo(4),
+      },
+      {
+        cycleId: westDepotAudit.id,
+        assetId: af0459.id,
+        expectedLocation: "Warehouse",
+        result: "VERIFIED",
+        verifiedById: sanaIqbal.id,
+        verifiedAt: daysAgo(5),
       },
     ],
   });
@@ -644,6 +1173,43 @@ async function main() {
         body: "Q3 audit: Engineering dept flagged a damaged asset.",
         createdAt: daysAgo(2),
       },
+      {
+        userId: nikhilMenon.id,
+        type: "MAINTENANCE_APPROVED",
+        title: "Critical maintenance opened: AF-0452",
+        body: "48-Port Switch AF-0452 is in progress with NetOps Vendor.",
+        isRead: false,
+        createdAt: daysAgo(0.2),
+      },
+      {
+        userId: farahKhan.id,
+        type: "ASSET_ASSIGNED",
+        title: "MacBook Pro AF-0448 assigned to you",
+        body: "MacBook Pro AF-0448 has been allocated to you (IT Operations).",
+        createdAt: daysAgo(0.35),
+      },
+      {
+        userId: kavyaIyer.id,
+        type: "BOOKING_CONFIRMED",
+        title: "Booking confirmed: Training Room C1",
+        body: "Training Room C1 is booked for new hire orientation tomorrow.",
+        isRead: false,
+        createdAt: daysAgo(0.5),
+      },
+      {
+        userId: imranSheikh.id,
+        type: "MAINTENANCE_APPROVED",
+        title: "Technician assigned for AF-0460",
+        body: "Device Care Center has been assigned to inspect the damaged field tablet.",
+        createdAt: daysAgo(0.75),
+      },
+      {
+        userId: poojaDesai.id,
+        type: "TRANSFER_APPROVED",
+        title: "Transfer approved: AF-0450",
+        body: "Ultrawide Monitor AF-0450 transfer was approved.",
+        createdAt: daysAgo(1),
+      },
     ],
     skipDuplicates: true,
   });
@@ -654,6 +1220,11 @@ async function main() {
       { actorId: assetManager.id, action: "ALLOCATED", entity: "Asset", entityId: af0114.id, details: { holder: "Priya Shah", department: "Engineering" }, createdAt: daysAgo(0.03) },
       { actorId: rohanMehta.id, action: "BOOKING_CONFIRMED", entity: "Booking", entityId: roomB2.id, details: { slot: "2:00 to 3:00 PM" }, createdAt: daysAgo(0.04) },
       { actorId: assetManager.id, action: "MAINTENANCE_RESOLVED", entity: "MaintenanceRequest", entityId: af0873.id, details: { asset: "AF-0873" }, createdAt: daysAgo(5) },
+      { actorId: nikhilMenon.id, action: "MAINTENANCE_ESCALATED", entity: "MaintenanceRequest", entityId: af0452.id, details: { asset: "AF-0452", priority: "CRITICAL" }, createdAt: daysAgo(0.2) },
+      { actorId: assetManager.id, action: "ALLOCATED", entity: "Asset", entityId: af0448.id, details: { holder: "Farah Khan", department: "IT Operations" }, createdAt: daysAgo(0.35) },
+      { actorId: kavyaIyer.id, action: "BOOKING_CONFIRMED", entity: "Booking", entityId: af0456.id, details: { slot: "Tomorrow", purpose: "New hire orientation" }, createdAt: daysAgo(0.5) },
+      { actorId: sanaIqbal.id, action: "AUDIT_CLOSED", entity: "AuditCycle", entityId: westDepotAudit.id, details: { title: "West Depot safety and fleet audit", damaged: 1 }, createdAt: daysAgo(2) },
+      { actorId: poojaDesai.id, action: "ASSET_RETIRED", entity: "Asset", entityId: af0462.id, details: { asset: "AF-0462", reason: "Repeated paper-feed failure" }, createdAt: daysAgo(15) },
     ],
   });
 

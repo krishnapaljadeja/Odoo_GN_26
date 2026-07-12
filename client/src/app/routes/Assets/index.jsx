@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Plus, ArrowDown, ArrowUp, ArrowUpDown, Columns3, List } from "lucide-react";
@@ -9,6 +9,7 @@ import { assetsApi } from "@/features/assets/api";
 import { AssetStatusBadge, CONDITION_LABEL } from "@/features/assets/badges";
 import { useDepartments, useCategories } from "@/features/org/hooks";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import RegisterAssetDialog from "./RegisterAssetDialog";
 
 const STATUS_OPTIONS = ["AVAILABLE", "ALLOCATED", "RESERVED", "UNDER_MAINTENANCE", "LOST", "RETIRED", "DISPOSED"];
@@ -77,18 +78,21 @@ const Assets = () => {
     [debouncedSearch, status, categoryId, departmentId, sort, page],
   );
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     assetsApi
       .list(params)
       .then((res) => setResult(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load assets")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [params]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [JSON.stringify(params)]);
+  useLiveRefresh(load, { enabled: !dialogOpen, deps: [JSON.stringify(params)] });
 
   const onSort = (key) => {
     setSort((prev) =>

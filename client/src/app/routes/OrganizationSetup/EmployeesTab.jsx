@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,6 +11,7 @@ import { orgApi } from "@/features/org/api";
 import { useDepartments } from "@/features/org/hooks";
 import { StatusBadge, RoleBadge, ROLE_LABEL } from "@/features/org/badges";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const ROLE_OPTIONS = ["ADMIN", "ASSET_MANAGER", "DEPARTMENT_HEAD", "EMPLOYEE"];
 
@@ -173,19 +174,22 @@ const EmployeesTab = () => {
     [debouncedSearch, department, role, status, sort, page],
   );
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
 
     orgApi
       .listEmployees(params)
       .then((res) => setResult(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load employees")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [params]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [JSON.stringify(params)]);
+  useLiveRefresh(load, { enabled: !editing, deps: [JSON.stringify(params)], intervalMs: 10000 });
 
   const onSort = (key) => {
     setSort((prev) => (prev.sortBy === key ? { sortBy: key, sortOrder: prev.sortOrder === "asc" ? "desc" : "asc" } : { sortBy: key, sortOrder: "asc" }));

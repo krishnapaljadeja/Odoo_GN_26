@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarClock, RotateCcw, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardLayout, PageHeader } from "../../components/layout";
@@ -8,6 +8,7 @@ import { DataState, EmptyState } from "../../components/data";
 import { bookingsApi } from "@/features/bookings/api";
 import { buildBookingPayload } from "@/features/bookings/schemas";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import BookingDialog from "./BookingDialog";
 
 const pad = (value) => String(value).padStart(2, "0");
@@ -65,25 +66,25 @@ const Bookings = () => {
     [resources, selectedResourceId],
   );
 
-  const loadResources = () =>
+  const loadResources = useCallback(() =>
     bookingsApi.resources().then((res) => {
       setResources(res.payload);
       setSelectedResourceId((current) => current || String(res.payload[0]?.id || ""));
-    });
+    }), []);
 
-  const loadCalendar = () => {
+  const loadCalendar = useCallback(() => {
     if (!selectedResourceId) return Promise.resolve();
     return bookingsApi
       .list({ assetId: selectedResourceId, date, mine: "false" })
       .then((res) => setBookings(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load bookings")));
-  };
+  }, [date, selectedResourceId]);
 
-  const loadMine = () =>
+  const loadMine = useCallback(() =>
     bookingsApi
       .list({ mine: "true", status: statusFilter || undefined, assetId: resourceFilter || undefined })
       .then((res) => setMine(res.payload))
-      .catch((err) => toast.error(getApiMessage(err, "Could not load your bookings.")));
+      .catch((err) => toast.error(getApiMessage(err, "Could not load your bookings."))), [resourceFilter, statusFilter]);
 
   useEffect(() => {
     setLoading(true);
@@ -103,7 +104,12 @@ const Bookings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, resourceFilter]);
 
-  const refresh = () => Promise.all([loadCalendar(), loadMine()]);
+  const refresh = useCallback(() => Promise.all([loadCalendar(), loadMine()]), [loadCalendar, loadMine]);
+  const refreshAll = useCallback(() => Promise.all([loadResources(), loadCalendar(), loadMine()]), [loadCalendar, loadMine, loadResources]);
+  useLiveRefresh(refreshAll, {
+    enabled: !dialogOpen,
+    deps: [selectedResourceId, date, statusFilter, resourceFilter],
+  });
 
   const handleSubmit = async (values) => {
     const resourceId = editing?.assetId || selectedResourceId;

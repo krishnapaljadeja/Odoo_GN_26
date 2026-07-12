@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { Check, X } from "lucide-react";
@@ -6,6 +6,7 @@ import { Button, Skeleton } from "@/components/ui";
 import { DataState, EmptyState } from "../../components/data";
 import { transfersApi } from "@/features/transfers/api";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 
 const formatDate = (value) => new Date(value).toLocaleString();
 
@@ -17,17 +18,20 @@ const PendingTransfersTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     transfersApi
       .list({ status: "REQUESTED", limit: 50 })
       .then((res) => setTransfers(res.payload.data))
       .catch((err) => setError(getApiMessage(err, "Could not load transfer requests")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, []);
 
   useEffect(load, []);
+  useLiveRefresh(load);
 
   const approve = async (transfer) => {
     try {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AlertTriangle, ClipboardCheck, Download, Plus } from "lucide-react";
@@ -12,6 +12,7 @@ import { AuditStatusBadge, ResultBadge } from "@/features/audits/badges";
 import { orgApi } from "@/features/org/api";
 import { useDepartments } from "@/features/org/hooks";
 import { getApiMessage } from "@/lib/api";
+import { useLiveRefresh } from "@/app/hooks/useLiveRefresh";
 import CreateAuditDialog from "./CreateAuditDialog";
 import CloseAuditDialog from "./CloseAuditDialog";
 
@@ -48,18 +49,21 @@ const AuditsList = ({ onCreate }) => {
 
   const params = useMemo(() => ({ search, status: status || undefined, scopeDeptId: department || undefined, limit: 50 }), [search, status, department]);
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     auditsApi
       .list(params)
       .then((res) => setResult(res.payload))
       .catch((err) => setError(getApiMessage(err, "Could not load audit cycles")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [params]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [JSON.stringify(params)]);
+  useLiveRefresh(load, { deps: [JSON.stringify(params)] });
 
   return (
     <>
@@ -132,8 +136,8 @@ const AuditDetail = () => {
   const [error, setError] = useState("");
   const [closeOpen, setCloseOpen] = useState(false);
 
-  const load = () => {
-    setIsLoading(true);
+  const load = useCallback(({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
     Promise.all([auditsApi.getById(id), auditsApi.discrepancies(id)])
       .then(([cycleRes, discRes]) => {
@@ -141,11 +145,14 @@ const AuditDetail = () => {
         setDiscrepancies(discRes.payload);
       })
       .catch((err) => setError(getApiMessage(err, "Could not load audit cycle")))
-      .finally(() => setIsLoading(false));
-  };
+      .finally(() => {
+        if (!silent) setIsLoading(false);
+      });
+  }, [id]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [id]);
+  useLiveRefresh(load, { enabled: !closeOpen, deps: [id] });
 
   const updateItem = async (item, result, notes = item.notes || "") => {
     try {
