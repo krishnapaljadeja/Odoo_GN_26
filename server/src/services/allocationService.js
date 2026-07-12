@@ -13,6 +13,15 @@ class ApiError extends Error {
 const logActivity = (tx, { actorId, action, entity, entityId, details }) =>
   tx.activityLog.create({ data: { actorId, action, entity, entityId, details } });
 
+const notifyManagers = async (tx, { type, title, body, meta }) => {
+  const managers = await tx.user.findMany({
+    where: { role: { in: ["ADMIN", "ASSET_MANAGER"] }, status: "ACTIVE" },
+    select: { id: true },
+  });
+  if (managers.length === 0) return;
+  await tx.notification.createMany({ data: managers.map((user) => ({ userId: user.id, type, title, body, meta })) });
+};
+
 const BLOCKED_STATUSES = ["UNDER_MAINTENANCE", "LOST", "RETIRED", "DISPOSED"];
 
 const allocationInclude = {
@@ -74,7 +83,13 @@ const allocate = async (actorId, { assetId, userId, departmentId, expectedReturn
       action: "ALLOCATED",
       entity: "Asset",
       entityId: assetId,
-      details: { userId, departmentId, assetTag: asset.assetTag },
+      details: {
+        userId,
+        userName: allocation.user?.name || allocation.user?.email || null,
+        departmentId,
+        assetTag: asset.assetTag,
+        assetName: asset.name,
+      },
     });
 
     if (userId) {
@@ -87,6 +102,21 @@ const allocate = async (actorId, { assetId, userId, departmentId, expectedReturn
           meta: { assetId },
         },
       });
+    }
+
+    if (!userId && departmentId) {
+      const department = await tx.department.findUnique({ where: { id: departmentId }, select: { name: true, headId: true } });
+      if (department?.headId) {
+        await tx.notification.create({
+          data: {
+            userId: department.headId,
+            type: "ASSET_ASSIGNED",
+            title: `${asset.name} ${asset.assetTag} assigned to ${department.name}`,
+            body: "A department asset allocation was created.",
+            meta: { assetId, departmentId },
+          },
+        });
+      }
     }
 
     return allocation;
@@ -106,7 +136,25 @@ const requestReturn = async (requester, id) => {
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.allocation.update({ where: { id }, data: { status: "RETURN_REQUESTED" }, include: allocationInclude });
-    await logActivity(tx, { actorId: requester.id, action: "RETURN_REQUESTED", entity: "Allocation", entityId: id, details: {} });
+    await logActivity(tx, {
+      actorId: requester.id,
+      action: "RETURN_REQUESTED",
+      entity: "Allocation",
+      entityId: id,
+      details: {
+        assetId: updated.assetId,
+        assetTag: updated.asset.assetTag,
+        assetName: updated.asset.name,
+        userId: updated.userId,
+        userName: updated.user?.name || updated.user?.email || null,
+      },
+    });
+    await notifyManagers(tx, {
+      type: "RETURN_REQUESTED",
+      title: `Return requested: ${updated.asset.assetTag}`,
+      body: `${updated.user?.name || updated.user?.email || "An employee"} requested return processing.`,
+      meta: { allocationId: id, assetId: updated.assetId },
+    });
     return updated;
   });
 };
@@ -132,7 +180,7 @@ const returnAllocation = async (actorId, id, { returnCondition, checkInNotes }) 
       action: "RETURNED",
       entity: "Asset",
       entityId: allocation.assetId,
-      details: { returnCondition, checkInNotes, assetTag: allocation.asset.assetTag },
+      details: { returnCondition, checkInNotes, assetTag: allocation.asset.assetTag, assetName: allocation.asset.name },
     });
 
     if (allocation.userId) {

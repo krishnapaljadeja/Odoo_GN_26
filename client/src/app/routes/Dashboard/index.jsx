@@ -7,8 +7,76 @@ import { DataState, StatCard } from "../../components/data";
 import { reportsApi } from "@/features/reports/api";
 import { getApiMessage } from "@/lib/api";
 
+const titleCase = (value) =>
+  value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const describeActivity = (row) => {
+  const details = row.details || {};
+
+  if (row.entity === "TransferRequest") {
+    const asset = details.assetTag ? `${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}` : "asset";
+    const route = details.fromUserName && details.toUserName ? ` from ${details.fromUserName} to ${details.toUserName}` : "";
+
+    if (row.action === "TRANSFER_APPROVED") return `Transfer approved: ${asset}${route}`;
+    if (row.action === "TRANSFER_REJECTED") return `Transfer rejected: ${asset}${route}`;
+    if (row.action === "TRANSFER_REQUESTED") return `Transfer requested: ${asset}${route}`;
+  }
+
+  if (row.entity === "MaintenanceRequest") {
+    const asset = details.assetTag ? `${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}` : "asset";
+    const technician = details.technicianName ? ` to ${details.technicianName}` : "";
+    const actor = row.actor?.name || row.actor?.email;
+
+    if (row.action === "MAINTENANCE_TECHNICIAN_ASSIGNED") return `Maintenance assigned: ${asset}${technician}`;
+    if (row.action === "MAINTENANCE_STARTED") return `Maintenance started: ${asset}${actor ? ` by ${actor}` : ""}`;
+    if (row.action === "MAINTENANCE_RESOLVED") return `Maintenance resolved: ${asset}${actor ? ` by ${actor}` : ""}`;
+    if (row.action === "MAINTENANCE_APPROVED") return `Maintenance approved: ${asset}`;
+    if (row.action === "MAINTENANCE_REJECTED") return `Maintenance rejected: ${asset}`;
+    if (row.action === "MAINTENANCE_REQUESTED") return `Maintenance requested: ${asset}`;
+  }
+
+  if (row.entity === "Booking") {
+    const asset = details.assetTag ? `${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}` : "resource";
+    const slot = details.slot ? `, ${details.slot}` : "";
+    if (row.action === "BOOKING_CONFIRMED") return `Booking confirmed: ${asset}${slot}`;
+    if (row.action === "BOOKING_CANCELLED") return `Booking cancelled: ${asset}${slot}`;
+    if (row.action === "BOOKING_RESCHEDULED") return `Booking rescheduled: ${asset}${slot}`;
+  }
+
+  if (row.entity === "AuditCycle") {
+    if (row.action === "AUDIT_CREATED") return `Audit created: ${details.title || "cycle"}`;
+    if (row.action === "AUDIT_CLOSED") return "Audit closed";
+  }
+
+  if (row.entity === "AuditItem") {
+    const asset = details.assetTag ? `${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}` : "asset";
+    if (row.action === "AUDIT_DISCREPANCY_FLAGGED") return `Audit discrepancy flagged: ${asset} ${details.result?.toLowerCase() || ""}`.trim();
+    if (row.action === "AUDIT_ITEM_UPDATED") return `Audit item updated: ${asset}`;
+  }
+
+  if (row.entity === "Allocation") {
+    const asset = details.assetTag ? `${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}` : "asset";
+    if (row.action === "RETURN_REQUESTED") return `Return requested: ${asset}`;
+  }
+
+  if (row.entity === "User" && row.action === "ROLE_CHANGED") {
+    return `Role changed: ${details.from || ""} to ${details.to || ""}`.trim();
+  }
+
+  if (details.assetTag) {
+    return `${titleCase(row.action)}: ${details.assetTag}${details.assetName ? ` (${details.assetName})` : ""}`;
+  }
+
+  return `${titleCase(row.action)} on ${row.entity}`;
+};
+
 const Dashboard = () => {
   const auth = useSelector((state) => state.auth);
+  const canManageAssets = ["ADMIN", "ASSET_MANAGER"].includes(auth.user.role);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +117,7 @@ const Dashboard = () => {
             )}
 
             <div className="flex flex-wrap gap-3">
-              <Link to="/assets" className="ui-button ui-button--default">+ Register Asset</Link>
+              {canManageAssets && <Link to="/assets" className="ui-button ui-button--default">+ Register Asset</Link>}
               <Link to="/bookings" className="ui-button ui-button--outline">Book Resource</Link>
               <Link to="/maintenance" className="ui-button ui-button--outline">Raise Request</Link>
             </div>
@@ -63,10 +131,9 @@ const Dashboard = () => {
                   <div className="p-4 text-sm text-zinc-500">No activity yet.</div>
                 ) : (
                   activity.map((row) => (
-                    <div key={row.id} className="px-4 py-3 text-sm text-zinc-300">
-                      <span className="font-medium text-zinc-100">{row.action.replaceAll("_", " ")}</span>{" "}
-                      <span className="text-zinc-500">on {row.entity}</span>
-                      <span className="float-right text-xs text-zinc-500">{new Date(row.createdAt).toLocaleString()}</span>
+                    <div key={row.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm text-zinc-300">
+                      <span className="font-medium text-zinc-100">{describeActivity(row)}</span>
+                      <span className="text-xs text-zinc-500">{new Date(row.createdAt).toLocaleString()}</span>
                     </div>
                   ))
                 )}
