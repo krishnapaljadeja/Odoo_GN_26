@@ -15,28 +15,9 @@ const NavbarMain = () => {
   return (
     <nav className="Navbar">
       <div className="inner container is-fixed">
-        <NavLink exact className="logo-brand no-deco" to="/">
-          <span className="brand-logo-mark">a</span>
-          <span className="brand-name">AssetFlow</span>
-        </NavLink>
         
         <div className="nav-links">
-          <NavLink
-            exact
-            activeClassName="active"
-            className="no-deco"
-            to="/dashboard"
-          >
-            Dashboard
-          </NavLink>
-          <NavLink
-            exact
-            activeClassName="active"
-            className="no-deco"
-            to="/another"
-          >
-            Another Private Page
-          </NavLink>
+          
           {auth.isAuthenticated ? (
             <React.Fragment>
               <SignoutButton />
