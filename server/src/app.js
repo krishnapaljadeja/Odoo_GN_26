@@ -42,5 +42,6 @@ app.use("/api/assets", require("./routes/assets"));
 app.use("/api/allocations", require("./routes/allocations"));
 app.use("/api/transfers", require("./routes/transfers"));
 app.use("/api/bookings", require("./routes/bookings"));
+app.use("/api/maintenance", require("./routes/maintenance"));
 
 module.exports = app;
