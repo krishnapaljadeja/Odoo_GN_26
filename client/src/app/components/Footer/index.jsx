@@ -4,11 +4,13 @@ import "./index.scss";
 const Footer = () => {
   return (
     <footer className="Footer">
-      <div className="inner container is-fixed">
-        <p>© 2026 everyone in the universe.</p>
+      <div className="footer-container container is-fixed">
+        <span className="footer-copyright">©2026 AssetFlow Computer Inc.</span>
       </div>
     </footer>
   );
 };
 
 export default Footer;
+
+

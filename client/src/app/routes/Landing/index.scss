@@ -1,34 +1,147 @@
 @use "sass:map";
 @use "../../styles/variables" as *;
+
+@import url("https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..100,400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Mono:wght@400;700&display=swap");
+
+// Global landing theme overrides applied dynamically when class is active on body
+body.landing-theme {
+  background-color: #f5f4f0 !important;
+  background-image: radial-gradient(rgba(61, 59, 79, 0.05) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  background-attachment: fixed !important;
+  color: #3d3b4f !important;
+
+  &, #root {
+    background-color: #f5f4f0 !important;
+  }
+}
+
 .Landing {
+  min-height: 100vh;
+  background-color: #f5f4f0;
+  color: #3d3b4f;
+  overflow: hidden;
+
+  // Custom scoped styles for the header navbar
+  .Navbar {
+    background-color: rgba(245, 244, 240, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(61, 59, 79, 0.08) !important;
+    color: #3d3b4f !important;
+
     .inner {
-        padding: {
-            top: map.get($spacing, "xl");
-            bottom: map.get($spacing, "xl");
+      a {
+        color: #3d3b4f !important;
+        font-family: "Space Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: color 0.15s ease;
+
+        &:hover {
+          color: #28e99f !important;
         }
-        .title {
-            font: {
-                weight: 500;
-            }
-            letter-spacing: 2px;
-        }
-        .subtitle {
-            margin: {
-                left: auto;
-                right: auto;
-                top: map.get($size, "lg");
-                bottom: map.get($size, "lg");
-            };
-            max-width: 420px;
-        }
-        .buttons {
-            justify-content: center;
-            :not(:last-child) {
-                margin-right: map.get($size, "sm");
-            }
-            .button {
-                min-width: 1.2 * map.get($spacing, "xl");
-            }
-        }
+      }
+
+      .active {
+        color: #3d3b4f !important;
+        font-weight: 700;
+        border-bottom: 2px solid #28e99f;
+        padding-bottom: 2px;
+      }
     }
+  }
+
+  .Navbar-Offset {
+    height: 4rem;
+  }
+
+  .landing-hero {
+    position: relative;
+    min-height: calc(100vh - 4rem - 12rem); // accounting for navbar & footer height
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 1.5rem 4rem;
+    isolation: isolate;
+  }
+
+  .landing-hero__background {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .hero-word {
+    font-family: "Anybody", sans-serif;
+    font-size: clamp(8rem, 28vw, 24rem);
+    font-weight: 900;
+    font-stretch: 100%;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    color: #dedcd3; // Properly visible light beige color matching screenshot watermark
+    line-height: 0.9;
+    user-select: none;
+    transform: translateY(10px);
+  }
+
+  .landing-hero__content {
+    position: relative;
+    z-index: 1;
+    width: min(720px, 100%);
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-family: "Space Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #3d3b4f;
+    opacity: 0.6;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #28e99f;
+    }
+  }
+
+  .title {
+    font-family: "Anybody", sans-serif;
+    font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+    color: #3d3b4f;
+  }
+
+  .subtitle {
+    font-family: "DM Sans", sans-serif;
+    margin: 0 0 2.2rem;
+    max-width: 610px;
+    margin-inline: auto;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #3d3b4f;
+    opacity: 0.85;
+  }
 }
