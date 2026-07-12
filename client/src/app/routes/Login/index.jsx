@@ -41,12 +41,12 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-transparent px-4 py-10">
       <Reveal>
         <Card as="form" className="w-full max-w-md" onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">AssetFlow &ndash; login</CardTitle>
-            <div className="mx-auto mt-4 flex h-14 w-14 items-center justify-center rounded-full border border-zinc-700 text-sm font-semibold tracking-wide text-zinc-200">
+            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#28E99F] bg-[#28E99F]/10 text-base font-bold font-mono text-[#28E99F]">
               AF
             </div>
           </CardHeader>

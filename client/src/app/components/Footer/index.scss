@@ -2,17 +2,30 @@
 @use "../../styles/variables" as *;
 
 .Footer {
-    background-color: map.get($color, "light");
-    color: map.get($color, "grey");
-    font-size: map.get($size, "sm");
-    padding: {
-        top: map.get($spacing, "md");
-        bottom: map.get($spacing, "md");
-    };
+  background-color: transparent;
+  color: #3d3b4f;
+  position: relative;
+  padding: 4rem 1.5rem 0;
+  overflow: hidden;
+  border-top: none;
 
-    .inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+  .footer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    margin-bottom: 1rem;
+  }
+
+  .footer-copyright {
+    font-family: "Space Mono", monospace;
+    font-size: 0.8rem;
+    color: #3d3b4f;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
 }
+
+
