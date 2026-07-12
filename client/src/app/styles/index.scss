@@ -230,6 +230,63 @@ code, pre, .mono-text, .badge, .ui-badge, td.font-medium, .asset-tag, .font-spac
   justify-content: center;
 }
 
+.assetflow-logo {
+  align-items: center;
+  color: #f5f3f0;
+  display: inline-flex;
+  gap: 0.625rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.assetflow-logo__mark {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(242, 178, 90, 0.18), rgba(40, 233, 159, 0.1));
+  border: 1px dashed rgba(242, 178, 90, 0.82);
+  border-radius: 5px;
+  color: #f2b25a;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.875rem;
+  font-style: italic;
+  font-weight: 900;
+  height: 1.75rem;
+  justify-content: center;
+  line-height: 1;
+  transform: rotate(-7deg);
+  width: 1.75rem;
+}
+
+.assetflow-logo__wordmark-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.assetflow-logo__wordmark {
+  color: #f5f3f0;
+  font-family: "Outfit", sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.assetflow-logo__underline {
+  background: #28e99f;
+  border-radius: 999px;
+  display: block;
+  height: 0.125rem;
+  width: 100%;
+}
+
+.auth-brand {
+  transform: scale(1.08);
+  transform-origin: center;
+}
+
 @keyframes ui-spin {
   to {
     transform: rotate(360deg);

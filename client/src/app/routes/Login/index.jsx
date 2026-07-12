@@ -10,6 +10,7 @@ import { loginSchema } from "@/features/auth/schemas";
 import { getApiMessage } from "@/lib/api";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "../../components/ui";
 import { Reveal } from "../../components/animation";
+import { AssetFlowLogo } from "../../components/brand";
 
 const Login = () => {
   const history = useHistory();
@@ -45,10 +46,8 @@ const Login = () => {
       <Reveal>
         <Card as="form" className="w-full max-w-md" onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">AssetFlow &ndash; login</CardTitle>
-            <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-sm border border-[#f2b25a] bg-[#f2b25a]/10 text-base font-bold font-mono text-[#f2b25a]">
-              AF
-            </div>
+            <AssetFlowLogo as="div" className="auth-brand mx-auto mb-4" />
+            <CardTitle className="text-xl">Login</CardTitle>
           </CardHeader>
           <CardContent>
             <label className="grid gap-2 text-sm font-medium text-zinc-300" htmlFor="email">

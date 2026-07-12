@@ -19,6 +19,7 @@ $nav-height: 4rem;
         display: flex;
         height: $nav-height;
         justify-content: space-between;
+        gap: 1rem;
 
         a {
             display: inline-block;
@@ -30,37 +31,12 @@ $nav-height: 4rem;
         }
     }
 
-    .logo-brand {
+    .assetflow-logo {
         display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        text-decoration: none;
-        color: inherit;
-        
-        .brand-logo-mark {
-            font-family: "Anybody", sans-serif;
-            font-style: italic;
-            font-size: 1.1rem;
-            background: rgba(242,178,90,0.18);
-            border: 1px dashed #f2b25a;
-            border-radius: 6px;
-            width: 26px;
-            height: 26px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #f2b25a;
-            line-height: 1;
-            font-weight: 800;
-            transform: rotate(-8deg);
-        }
-        
-        .brand-name {
-            font-family: "Anybody", sans-serif;
-            font-size: 1.15rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: inherit;
+        flex: 0 0 auto;
+
+        &:hover {
+            color: #f5f3f0;
         }
     }
 
@@ -68,6 +44,7 @@ $nav-height: 4rem;
         display: inline-flex;
         align-items: center;
         gap: 1.5rem;
+        margin-left: auto;
         
         a {
             text-decoration: none;
