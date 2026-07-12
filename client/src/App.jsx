@@ -16,6 +16,8 @@ const ForgotPassword = React.lazy(() => import("./app/routes/ForgotPassword"));
 const Landing = React.lazy(() => import("./app/routes/Landing"));
 const Dashboard = React.lazy(() => import("./app/routes/Dashboard"));
 const OrganizationSetup = React.lazy(() => import("./app/routes/OrganizationSetup"));
+const Assets = React.lazy(() => import("./app/routes/Assets"));
+const AssetDetail = React.lazy(() => import("./app/routes/Assets/Detail"));
 const Private = React.lazy(() => import("./app/routes/Private"));
 
 const App = (props) => {
@@ -67,6 +69,8 @@ const App = (props) => {
                 {...props}
                 component={OrganizationSetup}
               />
+              <PrivateRoute exact path="/assets" {...props} component={Assets} />
+              <PrivateRoute exact path="/assets/:id" {...props} component={AssetDetail} />
               <PrivateRoute
                 exact
                 path="/another"
