@@ -4,24 +4,36 @@ import { Input } from "@/components/ui";
 import { assetsApi } from "@/features/assets/api";
 import { AssetStatusBadge } from "@/features/assets/badges";
 
-const AssetCombobox = ({ value, onChange, placeholder = "Search by asset tag or name..." }) => {
+const AssetCombobox = ({ value, onChange, placeholder = "Search by asset tag or name...", initialResults = [], openOnMount = false }) => {
   const [query, setQuery] = useState(value ? `${value.assetTag} - ${value.name}` : "");
-  const [results, setResults] = useState([]);
-  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState(initialResults || []);
+  const [open, setOpen] = useState(openOnMount || false);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!open || !query.trim()) {
-      setResults([]);
+    if (!open) {
+      // keep any preloaded results available but hide the dropdown
       return undefined;
     }
 
     const timeout = setTimeout(() => {
-      assetsApi.list({ search: query, limit: 8 }).then((res) => setResults(res.payload.data));
-    }, 250);
+      if (query.trim()) {
+        assetsApi.list({ search: query, limit: 8 }).then((res) => setResults(res.payload.data));
+      } else {
+        // when opened with no search query, load a small default asset list
+        // if initialResults were provided, prefer them
+        if (initialResults && initialResults.length) setResults(initialResults);
+        else assetsApi.list({ limit: 12 }).then((res) => setResults(res.payload.data));
+      }
+    }, 300);
 
     return () => clearTimeout(timeout);
-  }, [query, open]);
+  }, [query, open, initialResults]);
+
+  // keep results synced if parent provides new initial results
+  useEffect(() => {
+    if (initialResults && initialResults.length) setResults(initialResults);
+  }, [initialResults]);
 
   useEffect(() => {
     const onClickOutside = (e) => {
