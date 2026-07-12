@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 import { Bell, ChevronDown, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { signout } from "../../state/authSlice";
 import { authApi } from "@/features/auth/api";
+import { notificationsApi } from "@/features/notifications/api";
 import { getApiMessage } from "@/lib/api";
 
 const ROLE_LABEL = {
@@ -19,6 +20,14 @@ const TopBar = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    notificationsApi
+      .unreadCount()
+      .then((res) => setUnread(res.payload.count))
+      .catch(() => setUnread(0));
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -39,6 +48,11 @@ const TopBar = () => {
         aria-label="Notifications"
       >
         <Bell size={18} />
+        {unread > 0 && (
+          <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-bold text-white">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
       </Link>
 
       <div className="relative">

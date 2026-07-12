@@ -44,5 +44,8 @@ app.use("/api/transfers", require("./routes/transfers"));
 app.use("/api/bookings", require("./routes/bookings"));
 app.use("/api/maintenance", require("./routes/maintenance"));
 app.use("/api/audits", require("./routes/audits"));
+app.use("/api/reports", require("./routes/reports"));
+app.use("/api/notifications", require("./routes/notifications"));
+app.use("/api/logs", require("./routes/logs"));
 
 module.exports = app;

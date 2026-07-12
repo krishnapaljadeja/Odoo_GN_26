@@ -24,4 +24,5 @@ const priorityVariant = {
   CRITICAL: "red",
 };
 
-export const PriorityBadge = ({ priority }) => <Badge variant={priorityVariant[priority] || "default"}>{PRIORITY_LABEL[priority] || priority}</Badge>;
+export const PriorityBadge = ({ priority }) =>
+  React.createElement(Badge, { variant: priorityVariant[priority] || "default" }, PRIORITY_LABEL[priority] || priority);
