@@ -35,5 +35,6 @@ app.use("/api/template", require("./routes/_template"));
 app.use("/auth", require("./routes/auth"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/user", require("./routes/api/user"));
+app.use("/api/org", require("./routes/org"));
 
 module.exports = app;

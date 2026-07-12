@@ -6,6 +6,7 @@ import { signout, updateUser } from "./app/state/authSlice";
 import { authApi } from "./features/auth/api";
 
 import PrivateRoute from "./app/containers/PrivateRoute";
+import RoleRoute from "./app/containers/RoleRoute";
 import Loading from "./app/components/Loading";
 import { SmoothScroll } from "./app/components/animation";
 
@@ -14,6 +15,7 @@ const Signup = React.lazy(() => import("./app/routes/Signup"));
 const ForgotPassword = React.lazy(() => import("./app/routes/ForgotPassword"));
 const Landing = React.lazy(() => import("./app/routes/Landing"));
 const Dashboard = React.lazy(() => import("./app/routes/Dashboard"));
+const OrganizationSetup = React.lazy(() => import("./app/routes/OrganizationSetup"));
 const Private = React.lazy(() => import("./app/routes/Private"));
 
 const App = (props) => {
@@ -57,6 +59,13 @@ const App = (props) => {
                 path="/dashboard"
                 {...props}
                 component={Dashboard}
+              />
+              <RoleRoute
+                exact
+                path="/organization"
+                roles={["ADMIN"]}
+                {...props}
+                component={OrganizationSetup}
               />
               <PrivateRoute
                 exact
