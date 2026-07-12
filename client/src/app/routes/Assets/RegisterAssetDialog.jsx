@@ -61,6 +61,15 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
     if (open) reset(toFormValues(asset));
   }, [open, asset, reset]);
 
+  // Prevent body/page scroll when dialog is open so only the dialog content scrolls
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    if (open) document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original || "";
+    };
+  }, [open]);
+
   const close = () => {
     setPhotoFile(null);
     onOpenChange(false);
@@ -107,15 +116,16 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto" onClose={close}>
+      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh]" onClose={close}>
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Asset" : "Register Asset"}</DialogTitle>
         </DialogHeader>
 
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
-          {!isEdit && <p className="text-xs text-zinc-500">Asset tag is auto-generated on save.</p>}
+        <div className="pr-2">
+          <form className="grid gap-4 grid-cols-1 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)} noValidate>
+          {!isEdit && <p className="text-xs text-zinc-500 md:col-span-2">Asset tag is auto-generated on save.</p>}
 
-          <FormField label="Name" placeholder="Dell Laptop" {...register("name")} error={errors.name?.message} />
+          <FormField className="md:col-span-2" label="Name" placeholder="Dell Laptop" {...register("name")} error={errors.name?.message} />
 
           <label className="grid gap-2 text-sm font-medium text-zinc-300">
             <span>Category</span>
@@ -130,31 +140,23 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
             {errors.categoryId && <span className="text-xs font-medium text-red-400">{errors.categoryId.message}</span>}
           </label>
 
-          <FormField
-            label="Serial number (optional)"
-            placeholder="SN-1234-AB"
-            {...register("serialNumber")}
-            error={errors.serialNumber?.message}
-          />
+          <FormField label="Serial number (optional)" placeholder="SN-1234-AB" {...register("serialNumber")} error={errors.serialNumber?.message} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 items-end">
             <FormField
               label="Acquisition date"
               type="date"
               {...register("acquisitionDate")}
               error={errors.acquisitionDate?.message}
             />
-            <div className="grid gap-2">
-              <FormField
-                label="Acquisition cost"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                {...register("acquisitionCost")}
-                error={errors.acquisitionCost?.message}
-              />
-              <p className="text-xs text-zinc-500">Used for reports only.</p>
-            </div>
+            <FormField
+              label="Acquisition cost"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              {...register("acquisitionCost")}
+              error={errors.acquisitionCost?.message}
+            />
           </div>
 
           <label className="grid gap-2 text-sm font-medium text-zinc-300">
@@ -167,7 +169,6 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
               ))}
             </Select>
           </label>
-
           <FormField label="Location" placeholder="HQ Floor 2" {...register("location")} error={errors.location?.message} />
 
           <label className="grid gap-2 text-sm font-medium text-zinc-300">
@@ -182,7 +183,7 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
             </Select>
           </label>
 
-          <div className="flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2">
+          <div className="flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2 md:col-span-2">
             <span className="text-sm font-medium text-zinc-300">Shared / bookable resource</span>
             <Controller
               control={control}
@@ -191,7 +192,7 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
             />
           </div>
 
-          <label className="grid gap-2 text-sm font-medium text-zinc-300">
+          <label className="grid gap-2 text-sm font-medium text-zinc-300 md:col-span-2">
             <span>Photo (jpg/png, max 5MB)</span>
             <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-zinc-700 px-3 py-2 text-sm text-zinc-400 hover:border-zinc-500">
               <ImagePlus size={16} />
@@ -205,7 +206,7 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
             </label>
           </label>
 
-          <DialogFooter>
+          <DialogFooter className="md:col-span-2 justify-center">
             <Button type="button" variant="outline" onClick={close}>
               Cancel
             </Button>
@@ -214,6 +215,7 @@ const RegisterAssetDialog = ({ open, onOpenChange, categories, departments, onSa
             </Button>
           </DialogFooter>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
