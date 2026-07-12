@@ -2,17 +2,14 @@ import { cn } from "@/lib/utils";
 
 export const GridBackground = ({ children, className }) => {
   return (
-    <div className={cn("min-h-screen w-full bg-white relative", className)}>
+    <div className={cn("min-h-screen w-full bg-[#0b0f19] relative overflow-hidden text-zinc-100", className)}>
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 pointer-events-none"
         style={{
-          background: "white",
           backgroundImage: `
-            linear-gradient(to right, rgba(71,85,105,0.15) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(71,85,105,0.15) 1px, transparent 1px),
-            radial-gradient(circle at 50% 60%, rgba(236,72,153,0.15) 0%, rgba(168,85,247,0.05) 40%, transparent 70%)
+            url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20h40M20 0v40' stroke='%231e293b' stroke-width='1'/%3E%3Cpath d='M18 20h4M20 18v4' stroke='%23334155' stroke-width='1'/%3E%3C/svg%3E")
           `,
-          backgroundSize: "40px 40px, 40px 40px, 100% 100%",
+          backgroundSize: "40px 40px",
         }}
       />
       <div className="relative z-10">{children}</div>
