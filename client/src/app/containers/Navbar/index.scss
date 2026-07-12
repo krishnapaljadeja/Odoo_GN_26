@@ -4,9 +4,9 @@
 $nav-height: 4rem;
 
 .Navbar {
-    background-color: #0b0f19;
-    border-bottom: 1px solid #1e293b;
-    color: #f4f4f5;
+    background-color: #141312;
+    border-bottom: 1px solid #2a2826;
+    color: #f5f3f0;
     font-size: 0.875rem;
 
     position: fixed;
@@ -26,7 +26,7 @@ $nav-height: 4rem;
         }
 
         .active {
-            color: #28E99F !important;
+            color: #f2b25a !important;
         }
     }
 
@@ -41,15 +41,15 @@ $nav-height: 4rem;
             font-family: "Anybody", sans-serif;
             font-style: italic;
             font-size: 1.1rem;
-            background: #fdf2f5;
-            border: 1px dashed #e599b4;
+            background: rgba(242,178,90,0.18);
+            border: 1px dashed #f2b25a;
             border-radius: 6px;
             width: 26px;
             height: 26px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #e599b4;
+            color: #f2b25a;
             line-height: 1;
             font-weight: 800;
             transform: rotate(-8deg);

@@ -5,24 +5,24 @@
 
 // Global landing theme overrides — dark theme
 body.landing-theme {
-  background-color: #0b0f19 !important;
+  background-color: #0d0d0c !important;
   background-image: none !important;
   color: #f4f4f5 !important;
 
   &, #root {
-    background-color: #0b0f19 !important;
+    background-color: #0d0d0c !important;
   }
 }
 
 .Landing {
   min-height: 100vh;
-  background-color: #0b0f19;
+  background-color: #0d0d0c;
   color: #f4f4f5;
   overflow: hidden;
 
   // Custom scoped styles for the header navbar — dark
   .Navbar {
-    background-color: rgba(11, 15, 25, 0.85) !important;
+    background-color: #141312 !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -359,14 +359,14 @@ body.landing-theme {
   }
 
   .button--primary {
-    background: #28E99F;
-    color: #0b0f19;
-    border-color: #28E99F;
-    box-shadow: 3px 3px 0 rgba(40, 233, 159, 0.3);
+    background: #f2b25a;
+    color: #17120c;
+    border-color: #f2b25a;
+    box-shadow: 3px 3px 0 rgba(242, 178, 90, 0.3);
 
     &:hover {
-      background: #20ca89;
-      box-shadow: 4px 4px 0 rgba(40, 233, 159, 0.4);
+      background: #d9972a;
+      box-shadow: 4px 4px 0 rgba(242, 178, 90, 0.4);
     }
   }
 

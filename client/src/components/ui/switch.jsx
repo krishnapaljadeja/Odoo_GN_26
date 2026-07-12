@@ -10,7 +10,7 @@ export const Switch = React.forwardRef(({ className, checked, onCheckedChange, .
     onClick={() => onCheckedChange(!checked)}
     className={cn(
       "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-      checked ? "bg-emerald-600" : "bg-zinc-700",
+      checked ? "bg-amber-500" : "bg-zinc-700",
       className,
     )}
     {...props}
