@@ -13,9 +13,5 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
-  },
-  "dependencies": {
-    "multer": "^2.2.0",
-    "qrcode": "^1.5.4"
   }
 }
