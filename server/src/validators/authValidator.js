@@ -50,6 +50,11 @@ const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+const verifySignupSchema = z.object({
+  email: emailSchema,
+  otp: z.string().trim().length(6, "Enter the 6-digit code"),
+});
+
 const buildValidator = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);
 
@@ -78,6 +83,7 @@ const buildValidator = (schema) => (req, res, next) => {
 
 module.exports = {
   validateSignup: buildValidator(signupSchema),
+  validateVerifySignup: buildValidator(verifySignupSchema),
   validateLogin: buildValidator(loginSchema),
   validateForgotPassword: buildValidator(forgotPasswordSchema),
   validateResetPassword: buildValidator(resetPasswordSchema),

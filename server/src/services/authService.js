@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { prisma } = require("../db");
-const { sendPasswordResetOtp } = require("./mailer");
+const { sendPasswordResetOtp, sendSignupOtp } = require("./mailer");
 const { generateOtp, getOtpExpiry, hashOtp, verifyOtp } = require("./otp");
 
 class ApiError extends Error {
@@ -43,7 +43,7 @@ const setAuthCookie = (res, user) => {
   return expiryTime;
 };
 
-const signup = async (res, { email, username, name, password }) => {
+const signup = async ({ email, username, name, password }) => {
   const existing = await prisma.user.findFirst({
     where: { OR: [{ email }, { username }] },
   });
@@ -54,11 +54,61 @@ const signup = async (res, { email, username, name, password }) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  const otp = generateOtp();
+  const otpHash = await hashOtp(otp);
+
+  await prisma.signupOtp.upsert({
+    where: { email },
+    update: { username, password: hashedPassword, name, otpHash, expiresAt: getOtpExpiry(), attempts: 0 },
+    create: { email, username, password: hashedPassword, name, otpHash, expiresAt: getOtpExpiry() },
+  });
+
+  await sendSignupOtp({ to: email, otp });
+
+  return { email, expiresAt: getOtpExpiry() };
+};
+
+const verifySignup = async (res, { email, otp }) => {
+  const pending = await prisma.signupOtp.findUnique({ where: { email } });
+
+  if (!pending) {
+    throw new ApiError(404, "NOT_FOUND", "No signup verification was requested for that email");
+  }
+
+  if (pending.expiresAt <= new Date()) {
+    await prisma.signupOtp.delete({ where: { email } });
+    throw new ApiError(410, "OTP_EXPIRED", "Verification code expired, request a new one");
+  }
+
+  if (pending.attempts >= 5) {
+    await prisma.signupOtp.delete({ where: { email } });
+    throw new ApiError(429, "TOO_MANY_ATTEMPTS", "Too many verification attempts, request a new code");
+  }
+
+  const otpMatches = await verifyOtp(otp, pending.otpHash);
+  if (!otpMatches) {
+    await prisma.signupOtp.update({ where: { email }, data: { attempts: { increment: 1 } } });
+    throw new ApiError(401, "INVALID_OTP", "Invalid verification code");
+  }
+
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ email: pending.email }, { username: pending.username }] },
+  });
+
+  if (existing) {
+    await prisma.signupOtp.delete({ where: { email } });
+    const field = existing.email === pending.email ? "email" : "username";
+    throw new ApiError(409, "ALREADY_REGISTERED", `That ${field} is already registered`);
+  }
 
   // Signup can only ever create an EMPLOYEE - role promotion happens later in
   // Organization Setup -> Employee Directory, never at signup time.
-  const user = await prisma.user.create({
-    data: { email, username, name, password: hashedPassword, role: "EMPLOYEE" },
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: { email: pending.email, username: pending.username, name: pending.name, password: pending.password, role: "EMPLOYEE" },
+    });
+    await tx.signupOtp.delete({ where: { email } });
+    return created;
   });
 
   const expires = setAuthCookie(res, user);
@@ -150,6 +200,7 @@ module.exports = {
   ApiError,
   toSafeUser,
   signup,
+  verifySignup,
   login,
   me,
   forgotPassword,

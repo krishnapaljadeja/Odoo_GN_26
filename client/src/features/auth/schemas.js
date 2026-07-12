@@ -37,6 +37,11 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
+export const verifySignupSchema = z.object({
+  email: emailSchema,
+  otp: z.string().trim().length(6, "Enter the 6-digit code"),
+});
+
 export const forgotPasswordSchema = z.object({
   email: emailSchema,
 });

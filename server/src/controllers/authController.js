@@ -11,7 +11,16 @@ const handleError = (res, error) => {
 
 const signup = async (req, res) => {
   try {
-    const payload = await authService.signup(res, req.body);
+    const payload = await authService.signup(req.body);
+    return res.status(200).json({ message: "Verification code sent", payload });
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+const verifySignup = async (req, res) => {
+  try {
+    const payload = await authService.verifySignup(res, req.body);
     return res.status(201).json({ message: "Registered and logged in", payload });
   } catch (error) {
     return handleError(res, error);
@@ -61,6 +70,7 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
   signup,
+  verifySignup,
   login,
   logout,
   me,
