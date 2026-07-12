@@ -1,3 +1,4 @@
 module.exports = {
-    authenticate: require("./_authenticate")
+    authenticate: require("./_authenticate"),
+    requireRole: require("./_requireRole"),
 }

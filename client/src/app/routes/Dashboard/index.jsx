@@ -13,7 +13,7 @@ const Dashboard = () => {
     <div className="Dashboard">
       <div className="inner container is-fluid">
         <h2 className="title has-text-centered">Dashboard</h2>
-        <p className="is-md has-text-centered">{`Welcome, ${auth.user.first_name} ${auth.user.last_name}`}</p>
+        <p className="is-md has-text-centered">{`Welcome, ${auth.user.name || auth.user.username} (${auth.user.role})`}</p>
         <p className="subtitle has-text-centered">
           This is the Dashboard Page. This is a private route and only displayed
           if user is logged in.

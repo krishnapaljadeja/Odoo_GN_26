@@ -2,16 +2,15 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Reveal } from "../../components/animation";
+import Navbar from "../../containers/Navbar";
+import Footer from "../../components/Footer";
 import "./index.scss";
-
-//Import components
-
-//Import containers
 
 const Landing = () => {
   const auth = useSelector((state) => state.auth);
   return (
     <div className="Landing">
+      <Navbar />
       <Reveal className="inner container is-fluid">
         <h1 className="title is-xxxxl has-text-centered">PERN Boilerplate</h1>
         <p className="is-lg subtitle has-text-centered">
@@ -31,7 +30,7 @@ const Landing = () => {
           </div>
         ) : (
           <div className="buttons">
-            <Link to="/signin">
+            <Link to="/login">
               <button className="button is-blue is-hollow is-large">
                 Sign In
               </button>
@@ -42,6 +41,7 @@ const Landing = () => {
           </div>
         )}
       </Reveal>
+      <Footer />
     </div>
   );
 };

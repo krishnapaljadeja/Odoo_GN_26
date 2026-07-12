@@ -5,6 +5,7 @@
 access.log
 
 client/build
+client/dist
 node_modules
 
 npm-debug.log*
