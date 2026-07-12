@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { toast } from "sonner";
 import { signin } from "../../state/authSlice";
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "../../components/ui";
 
 import "./index.scss";
 
@@ -10,17 +12,18 @@ const Signin = () => {
   let history = useHistory();
   let location = useLocation();
   let { from } = location.state || {
-    from: { pathname: import.meta.env.VITE_DEFAULT_LOGIN_REDIRECT },
+    from: { pathname: import.meta.env.VITE_DEFAULT_LOGIN_REDIRECT || "/dashboard" },
   };
 
   const dispatch = useDispatch();
 
   const defaultLocalState = {
-    loginId: "",
+    email: "",
     password: "",
   };
 
   const [localState, setLocalState] = useState(defaultLocalState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -31,12 +34,13 @@ const Signin = () => {
     try {
       e.preventDefault();
 
-      if (localState.loginId === "" || localState.password === "") {
-        window.alert("Login Id or Password cannot be blank.");
+      if (localState.email === "" || localState.password === "") {
+        toast.error("Email and password are required.");
         return;
       }
-      const res = await axios.post("/auth/local", {
-        login_id: localState.loginId,
+      setIsSubmitting(true);
+      const res = await axios.post("/auth/login", {
+        email: localState.email,
         password: localState.password,
       });
 
@@ -45,38 +49,52 @@ const Signin = () => {
       if (res.status === 200) {
         const { expires, user } = res.data.payload;
         dispatch(signin({ expires, user }));
+        toast.success("Signed in.");
         history.replace(from);
       }
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data) {
-        window.alert(error.response.data.message);
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Could not sign in. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="Signin">
-      <div className="inner container is-fluid">
-        <h2>Sign In</h2>
-        <input
-          type="text"
-          placeholder="Login Id"
-          name="loginId"
-          value={localState.loginId}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          name="password"
-          value={localState.password}
-          onChange={handleChange}
-          className="input"
-        />
-        <button onClick={onClickSignin} className="button is-blue is-hollow">Sign In</button>
-      </div>
+      <Card as="form" className="auth-card" onSubmit={onClickSignin}>
+        <CardHeader>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Use the email and password for your account.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={localState.email}
+            onChange={handleChange}
+            autoComplete="email"
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            name="password"
+            value={localState.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+          />
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" isLoading={isSubmitting}>
+            Sign In
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

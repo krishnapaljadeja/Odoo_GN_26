@@ -1,16 +1,19 @@
 @use "sass:map";
 @use "../../styles/variables" as *;
 .Signin {
-  .inner {
-    margin: {
-        left: auto;
-        right: auto;
-    };
-    padding: {
-      top: map.get($spacing, "md");
-      bottom: map.get($spacing, "md");
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: map.get($spacing, "md") 1rem;
+
+  .auth-card {
+    max-width: 28rem;
+    width: 100%;
+  }
+
+  .ui-card__footer {
+    .ui-button {
+      width: 100%;
     }
-    text-align: center;
-    width: max-content;
   }
 }
