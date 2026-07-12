@@ -74,7 +74,7 @@ const Reports = () => {
         {data && (
           <div className="grid gap-5">
             <div className="flex flex-wrap items-center gap-3">
-              <Select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="max-w-[12rem]">
+              <Select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="max-w-[13rem]">
                 <option value="department">By department</option>
                 <option value="category">By category</option>
               </Select>
@@ -89,9 +89,13 @@ const Reports = () => {
             <div className="grid gap-5 lg:grid-cols-2">
               <ChartCard title="Utilization">
                 <div className="grid gap-3">
-                  {data.utilization.map((row) => (
-                    <Bar key={row.label} label={`${row.label} (${row.allocated}/${row.total})`} value={row.utilization} />
-                  ))}
+                  {data.utilization.length === 0 ? (
+                    <p className="text-sm text-zinc-500">No utilization data for this scope.</p>
+                  ) : (
+                    data.utilization.map((row) => (
+                      <Bar key={row.label} label={`${row.label} (${row.allocated}/${row.total})`} value={row.utilization} />
+                    ))
+                  )}
                 </div>
               </ChartCard>
 
@@ -109,36 +113,50 @@ const Reports = () => {
             <div className="grid gap-5 lg:grid-cols-3">
               <ChartCard title="Most used assets">
                 <div className="grid gap-3 text-sm">
-                  {data.mostUsed.bookings.map((row) => (
-                    <div key={`b-${row.asset.id}`} className="text-zinc-300">
-                      {row.asset.name} {row.asset.assetTag}: <span className="text-zinc-500">{row.count} bookings</span>
-                    </div>
-                  ))}
-                  {data.mostUsed.allocations.map((row) => (
-                    <div key={`a-${row.asset.id}`} className="text-zinc-300">
-                      {row.asset.name} {row.asset.assetTag}: <span className="text-zinc-500">{row.count} allocations</span>
-                    </div>
-                  ))}
+                  {data.mostUsed.bookings.length === 0 && data.mostUsed.allocations.length === 0 ? (
+                    <p className="text-sm text-zinc-500">No usage data yet.</p>
+                  ) : (
+                    <>
+                      {data.mostUsed.bookings.map((row) => (
+                        <div key={`b-${row.asset.id}`} className="text-zinc-300">
+                          {row.asset.name} {row.asset.assetTag}: <span className="text-zinc-500">{row.count} bookings</span>
+                        </div>
+                      ))}
+                      {data.mostUsed.allocations.map((row) => (
+                        <div key={`a-${row.asset.id}`} className="text-zinc-300">
+                          {row.asset.name} {row.asset.assetTag}: <span className="text-zinc-500">{row.count} allocations</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </ChartCard>
 
               <ChartCard title="Idle assets">
                 <div className="grid gap-3 text-sm">
-                  {data.idle.map((asset) => (
-                    <div key={asset.id} className="text-zinc-300">
-                      {asset.name} {asset.assetTag}: <span className="text-zinc-500">unused {asset.idleDays}+ days</span>
-                    </div>
-                  ))}
+                  {data.idle.length === 0 ? (
+                    <p className="text-sm text-zinc-500">No idle assets found.</p>
+                  ) : (
+                    data.idle.map((asset) => (
+                      <div key={asset.id} className="text-zinc-300">
+                        {asset.name} {asset.assetTag}: <span className="text-zinc-500">unused {asset.idleDays}+ days</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </ChartCard>
 
               <ChartCard title="Due for maintenance / retirement">
                 <div className="grid gap-3 text-sm">
-                  {data.dueSoon.map((asset) => (
-                    <div key={asset.id} className="text-zinc-300">
-                      {asset.name} {asset.assetTag}: <span className="text-zinc-500">{asset.condition.toLowerCase()} condition</span>
-                    </div>
-                  ))}
+                  {data.dueSoon.length === 0 ? (
+                    <p className="text-sm text-zinc-500">No assets currently due.</p>
+                  ) : (
+                    data.dueSoon.map((asset) => (
+                      <div key={asset.id} className="text-zinc-300">
+                        {asset.name} {asset.assetTag}: <span className="text-zinc-500">{asset.condition.toLowerCase()} condition</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </ChartCard>
             </div>
@@ -171,12 +189,16 @@ const Reports = () => {
 
             <ChartCard title="Department allocation summary" action={<BarChart3 size={16} className="text-zinc-500" />}>
               <div className="grid gap-2">
-                {data.allocation.map((row) => (
-                  <div key={row.label} className="flex justify-between rounded-md border border-zinc-800 px-3 py-2 text-sm text-zinc-300">
-                    <span>{row.label}</span>
-                    <span>{row.allocated}/{row.total} allocated</span>
-                  </div>
-                ))}
+                {data.allocation.length === 0 ? (
+                  <p className="text-sm text-zinc-500">No allocation summary available.</p>
+                ) : (
+                  data.allocation.map((row) => (
+                    <div key={row.label} className="flex justify-between rounded-md border border-zinc-800 px-3 py-2 text-sm text-zinc-300">
+                      <span>{row.label}</span>
+                      <span>{row.allocated}/{row.total} allocated</span>
+                    </div>
+                  ))
+                )}
               </div>
             </ChartCard>
           </div>

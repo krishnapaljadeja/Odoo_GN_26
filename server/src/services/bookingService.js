@@ -20,6 +20,17 @@ const bookingInclude = {
 const logActivity = (tx, { actorId, action, entityId, details }) =>
   tx.activityLog.create({ data: { actorId, action, entity: "Booking", entityId, details } });
 
+const notifyManagers = async (tx, actorId, { type, title, body, meta }) => {
+  const managers = await tx.user.findMany({
+    where: { role: { in: ["ADMIN", "ASSET_MANAGER"] }, status: "ACTIVE", id: { not: actorId } },
+    select: { id: true },
+  });
+  if (managers.length === 0) return;
+  await tx.notification.createMany({
+    data: managers.map((user) => ({ userId: user.id, type, title, body, meta })),
+  });
+};
+
 const deriveStatus = (booking, now = new Date()) => {
   if (booking.status === "CANCELLED") return "CANCELLED";
   if (booking.endTime <= now) return "COMPLETED";
@@ -156,12 +167,24 @@ const createBooking = async (actor, { assetId, startTime, endTime, purpose }) =>
         meta: { bookingId: booking.id, assetId },
       },
     });
+    await notifyManagers(tx, actor.id, {
+      type: "BOOKING_CONFIRMED",
+      title: `Booking created: ${asset.assetTag}`,
+      body: `${actor.name || actor.email} booked ${asset.name}, ${slotLabel(startTime, endTime)}.`,
+      meta: { bookingId: booking.id, assetId },
+    });
 
     await logActivity(tx, {
       actorId: actor.id,
       action: "BOOKING_CONFIRMED",
       entityId: booking.id,
-      details: { assetId, assetTag: asset.assetTag, slot: slotLabel(startTime, endTime) },
+      details: {
+        assetId,
+        assetTag: asset.assetTag,
+        assetName: asset.name,
+        userName: actor.name || actor.email,
+        slot: slotLabel(startTime, endTime),
+      },
     });
 
     return booking;
@@ -189,7 +212,24 @@ const cancelBooking = async (requester, id) => {
         meta: { bookingId: id, assetId: booking.assetId },
       },
     });
-    await logActivity(tx, { actorId: requester.id, action: "BOOKING_CANCELLED", entityId: id, details: { assetId: booking.assetId } });
+    await notifyManagers(tx, requester.id, {
+      type: "BOOKING_CANCELLED",
+      title: `Booking cancelled: ${booking.asset.assetTag}`,
+      body: `${requester.name || requester.email} cancelled ${booking.asset.name}, ${slotLabel(booking.startTime, booking.endTime)}.`,
+      meta: { bookingId: id, assetId: booking.assetId },
+    });
+    await logActivity(tx, {
+      actorId: requester.id,
+      action: "BOOKING_CANCELLED",
+      entityId: id,
+      details: {
+        assetId: booking.assetId,
+        assetTag: booking.asset.assetTag,
+        assetName: booking.asset.name,
+        userName: booking.user.name || booking.user.email,
+        slot: slotLabel(booking.startTime, booking.endTime),
+      },
+    });
     return updated;
   }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 };
@@ -217,7 +257,33 @@ const rescheduleBooking = async (requester, id, { startTime, endTime, purpose })
       data: { startTime, endTime, purpose: purpose ?? booking.purpose, status: "UPCOMING" },
       include: bookingInclude,
     });
-    await logActivity(tx, { actorId: requester.id, action: "BOOKING_RESCHEDULED", entityId: id, details: { slot: slotLabel(startTime, endTime) } });
+    await tx.notification.create({
+      data: {
+        userId: booking.userId,
+        type: "BOOKING_RESCHEDULED",
+        title: `Booking rescheduled: ${booking.asset.name}`,
+        body: slotLabel(startTime, endTime),
+        meta: { bookingId: id, assetId: booking.assetId },
+      },
+    });
+    await notifyManagers(tx, requester.id, {
+      type: "BOOKING_RESCHEDULED",
+      title: `Booking rescheduled: ${booking.asset.assetTag}`,
+      body: `${requester.name || requester.email} moved ${booking.asset.name} to ${slotLabel(startTime, endTime)}.`,
+      meta: { bookingId: id, assetId: booking.assetId },
+    });
+    await logActivity(tx, {
+      actorId: requester.id,
+      action: "BOOKING_RESCHEDULED",
+      entityId: id,
+      details: {
+        assetId: booking.assetId,
+        assetTag: booking.asset.assetTag,
+        assetName: booking.asset.name,
+        userName: booking.user.name || booking.user.email,
+        slot: slotLabel(startTime, endTime),
+      },
+    });
     return updated;
   });
 };

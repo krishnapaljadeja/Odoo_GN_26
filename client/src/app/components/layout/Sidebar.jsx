@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { to: "/bookings", label: "Resource Booking", icon: CalendarClock },
   { to: "/maintenance", label: "Maintenance", icon: Wrench },
   { to: "/audits", label: "Audit", icon: ClipboardCheck },
-  { to: "/reports", label: "Reports", icon: BarChart3 },
+  { to: "/reports", label: "Reports", icon: BarChart3, roles: ["ADMIN", "ASSET_MANAGER", "DEPARTMENT_HEAD"] },
   { to: "/notifications", label: "Notifications", icon: Bell },
 ];
 

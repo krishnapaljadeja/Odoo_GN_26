@@ -12,6 +12,30 @@ class ApiError extends Error {
 const logActivity = (tx, { actorId, action, entity, entityId, details }) =>
   tx.activityLog.create({ data: { actorId, action, entity, entityId, details } });
 
+const notifyTransferApprovers = async (tx, transfer) => {
+  const approvers = await tx.user.findMany({
+    where: {
+      status: "ACTIVE",
+      OR: [
+        { role: { in: ["ADMIN", "ASSET_MANAGER"] } },
+        { role: "DEPARTMENT_HEAD", departmentId: { in: [transfer.fromUser.departmentId, transfer.toUser.departmentId].filter(Boolean) } },
+      ],
+    },
+    select: { id: true },
+  });
+  const userIds = [...new Set(approvers.map((user) => user.id))];
+  if (userIds.length === 0) return;
+  await tx.notification.createMany({
+    data: userIds.map((userId) => ({
+      userId,
+      type: "TRANSFER_REQUESTED",
+      title: `Transfer requested: ${transfer.asset.assetTag}`,
+      body: `${transfer.fromUser.name || transfer.fromUser.email} to ${transfer.toUser.name || transfer.toUser.email}`,
+      meta: { transferId: transfer.id, assetId: transfer.asset.id },
+    })),
+  });
+};
+
 const transferInclude = {
   asset: { select: { id: true, assetTag: true, name: true, status: true } },
   fromUser: { select: { id: true, name: true, email: true, departmentId: true } },
@@ -53,8 +77,17 @@ const createTransfer = async (requester, { assetId, toUserId, reason }) => {
       action: "TRANSFER_REQUESTED",
       entity: "TransferRequest",
       entityId: transfer.id,
-      details: { assetTag: asset.assetTag, fromUserId: activeAllocation.userId, toUserId },
+      details: {
+        assetTag: transfer.asset.assetTag,
+        assetName: transfer.asset.name,
+        fromUserId: transfer.fromUserId,
+        fromUserName: transfer.fromUser.name,
+        toUserId: transfer.toUserId,
+        toUserName: transfer.toUser.name,
+      },
     });
+
+    await notifyTransferApprovers(tx, transfer);
 
     return transfer;
   });
@@ -109,7 +142,12 @@ const approveTransfer = async (requester, id) => {
       action: "TRANSFER_APPROVED",
       entity: "TransferRequest",
       entityId: id,
-      details: { assetTag: transfer.asset.assetTag },
+      details: {
+        assetTag: transfer.asset.assetTag,
+        assetName: transfer.asset.name,
+        fromUserName: transfer.fromUser.name,
+        toUserName: transfer.toUser.name,
+      },
     });
 
     await tx.notification.createMany({
@@ -152,7 +190,13 @@ const rejectTransfer = async (requester, id, note) => {
       action: "TRANSFER_REJECTED",
       entity: "TransferRequest",
       entityId: id,
-      details: { note: note || null },
+      details: {
+        assetTag: transfer.asset.assetTag,
+        assetName: transfer.asset.name,
+        fromUserName: transfer.fromUser.name,
+        toUserName: transfer.toUser.name,
+        note: note || null,
+      },
     });
 
     await tx.notification.create({
